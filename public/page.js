@@ -75,7 +75,6 @@ function renderAllContent() {
                     <div class="card">
                         <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️</button>
                         <div class="card-title">${item.title}</div>
-                        <div class="card-description">${item.description}</div>
                         <img src="${item.link}" alt="${item.title}"
                              style="width:100%;border-radius:8px;margin:10px 0;">
                         <button class="card-btn" onclick="openLink(event, '${item.link}')">Xem ảnh</button>
@@ -87,7 +86,6 @@ function renderAllContent() {
                     <div class="card">
                         <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️</button>
                         <div class="card-title">${typeIcons[type] || ''} ${item.title}</div>
-                        <div class="card-description">${item.description}</div>
                         <button class="card-btn" onclick="openLink(event, '${item.link}')">Xem ngay</button>
                     </div>
                 `).join('');
@@ -243,7 +241,6 @@ async function handleSubmit(event) {
 
     const type = document.getElementById('contentType').value;
     const title = document.getElementById('contentTitle').value;
-    const description = document.getElementById('contentDescription').value;
     const linkInput = document.getElementById('contentLink');
     const imageInput = document.getElementById('contentImage');
 
@@ -251,7 +248,6 @@ async function handleSubmit(event) {
         const formData = new FormData();
         formData.append('type', type);
         formData.append('title', title);
-        formData.append('description', description);
 
         if (type === 'inforgraphic') {
             if (!imageInput.files || !imageInput.files[0]) {

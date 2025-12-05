@@ -109,7 +109,7 @@ app.get('/api/content', (req, res) => {
  * - Các type khác: giữ cách cũ (dùng link)
  */
 app.post('/api/content', upload.single('image'), (req, res) => {
-  const { type, title, description, link } = req.body;
+  const { type, title, link } = req.body;
 
   if (!TYPES.includes(type)) {
     return res.status(400).json({ error: 'Invalid type' });
@@ -129,7 +129,6 @@ app.post('/api/content', upload.single('image'), (req, res) => {
       id,
       type: 'inforgraphic',
       title,
-      description,
       link: imagePath, // 👈 JSON chỉ đường tới ảnh
       createdAt: new Date().toISOString()
     };
@@ -146,8 +145,7 @@ app.post('/api/content', upload.single('image'), (req, res) => {
     __backendId: id,
     id,
     type,
-    title,
-    description,
+    title, 
     link,
     createdAt: new Date().toISOString()
   };
