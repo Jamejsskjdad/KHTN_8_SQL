@@ -15,7 +15,8 @@ const typeIcons = {
     flashcards: '🎴',
     games: '🎮',
     experiments: '🔬',
-    quizzes: '📝'
+    quizzes: '📝',
+    inforgraphic: ''
 };
 
 const typeLabels = {
@@ -24,7 +25,8 @@ const typeLabels = {
     flashcards: 'Thẻ Flashcard',
     games: 'Game',
     experiments: 'Thí nghiệm',
-    quizzes: 'Trắc nghiệm'
+    quizzes: 'Trắc nghiệm',
+    inforgraphic: 'Inforgraphic' // thêm dòng này
 };
 
 async function loadData() {
@@ -49,29 +51,47 @@ function initApp() {
 }
 
 function renderAllContent() {
-    const types = ['videos', 'comics', 'flashcards', 'games', 'experiments', 'quizzes'];
-    
+    // thêm inforgraphic vào danh sách type
+    const types = ['videos', 'comics', 'flashcards', 'games', 'experiments', 'quizzes', 'inforgraphic'];
+
     types.forEach(type => {
         const grid = document.getElementById(`${type}Grid`);
+        if (!grid) return;
+
         const items = allContent.filter(item => item.type === type);
-        
+
         if (items.length === 0) {
             grid.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-state-icon">${typeIcons[type]}</div>
-                    <div class="empty-state-text">Chưa có ${typeLabels[type].toLowerCase()}</div>
+                    <div class="empty-state-icon">${typeIcons[type] || ''}</div>
+                    <div class="empty-state-text">Chưa có ${typeLabels[type]?.toLowerCase() || ''}</div>
                     <div class="empty-state-subtext">Vào trang Quản trị để thêm nội dung mới</div>
                 </div>
             `;
         } else {
-            grid.innerHTML = items.map(item => `
-                <div class="card">
-                    <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">🗑️</button>
-                    <div class="card-title">${typeIcons[type]} ${item.title}</div>
-                    <div class="card-description">${item.description}</div>
-                    <button class="card-btn" onclick="openLink(event, '${item.link}')">Xem ngay</button>
-                </div>
-            `).join('');
+            // Nếu là inforgraphic thì hiển thị ảnh
+            if (type === 'inforgraphic') {
+                grid.innerHTML = items.map(item => `
+                    <div class="card">
+                        <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️</button>
+                        <div class="card-title">${item.title}</div>
+                        <div class="card-description">${item.description}</div>
+                        <img src="${item.link}" alt="${item.title}"
+                             style="width:100%;border-radius:8px;margin:10px 0;">
+                        <button class="card-btn" onclick="openLink(event, '${item.link}')">Xem ảnh</button>
+                    </div>
+                `).join('');
+            } else {
+                // Các loại khác giữ nguyên cách hiển thị
+                grid.innerHTML = items.map(item => `
+                    <div class="card">
+                        <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️</button>
+                        <div class="card-title">${typeIcons[type] || ''} ${item.title}</div>
+                        <div class="card-description">${item.description}</div>
+                        <button class="card-btn" onclick="openLink(event, '${item.link}')">Xem ngay</button>
+                    </div>
+                `).join('');
+            }
         }
     });
 }
@@ -188,25 +208,72 @@ function cancelDelete() {
         window.currentConfirmModal = null;
     }
 }
+function updateAdminFields() {
+    const typeSelect = document.getElementById('contentType');
+    const linkGroup = document.getElementById('contentLinkGroup');
+    const imageGroup = document.getElementById('contentImageGroup');
+    const linkInput = document.getElementById('contentLink');
+    const imageInput = document.getElementById('contentImage');
+
+    if (!typeSelect || !linkGroup || !imageGroup || !linkInput || !imageInput) return;
+
+    if (typeSelect.value === 'inforgraphic') {
+        // Ẩn ô link, hiện ô upload ảnh
+        linkGroup.style.display = 'none';
+        linkInput.required = false;
+
+        imageGroup.style.display = 'block';
+        imageInput.required = true;
+    } else {
+        // Ngược lại
+        linkGroup.style.display = 'block';
+        linkInput.required = true;
+
+        imageGroup.style.display = 'none';
+        imageInput.required = false;
+    }
+}
 
 async function handleSubmit(event) {
     event.preventDefault();
-    
+
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = true;
     submitBtn.textContent = 'Đang thêm...';
-    
+
     const type = document.getElementById('contentType').value;
     const title = document.getElementById('contentTitle').value;
     const description = document.getElementById('contentDescription').value;
-    const link = document.getElementById('contentLink').value;
+    const linkInput = document.getElementById('contentLink');
+    const imageInput = document.getElementById('contentImage');
 
     try {
+        const formData = new FormData();
+        formData.append('type', type);
+        formData.append('title', title);
+        formData.append('description', description);
+
+        if (type === 'inforgraphic') {
+            if (!imageInput.files || !imageInput.files[0]) {
+                alert('Vui lòng chọn ảnh Inforgraphic (PNG/JPG)');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Thêm mới';
+                return;
+            }
+            formData.append('image', imageInput.files[0]);
+        } else {
+            formData.append('link', linkInput.value);
+        }
+
         const res = await fetch('/api/content', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type, title, description, link })
+            body: formData
         });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || 'Lỗi khi thêm nội dung');
+        }
 
         const newItem = await res.json();
 
@@ -214,22 +281,22 @@ async function handleSubmit(event) {
         renderAllContent();
 
         document.getElementById('adminForm').reset();
+        updateAdminFields(); // reset lại hiển thị các field
 
         const successDiv = document.createElement('div');
-        successDiv.style.cssText = 'background: #4CAF50; color: white; padding: 15px; border-radius: 8px; margin-top: 15px; text-align: center;';
+        successDiv.style.cssText =
+            'background: #4CAF50; color: white; padding: 15px; border-radius: 8px; margin-top: 15px; text-align: center;';
         successDiv.textContent = 'Đã thêm nội dung thành công!';
         document.querySelector('.admin-form').appendChild(successDiv);
         setTimeout(() => successDiv.remove(), 3000);
     } catch (err) {
         console.error(err);
-        alert('Lỗi khi thêm nội dung');
+        alert(err.message || 'Lỗi khi thêm nội dung');
     }
 
     submitBtn.disabled = false;
     submitBtn.textContent = 'Thêm mới';
 }
-
-
 
 function closeChatbot() {
     document.getElementById('chatbotModal').classList.remove('active');
@@ -372,10 +439,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 fontSizeable: undefined
             }),
             mapToEditPanelValues: (config) => new Map([
-                ["site_title", config.site_title || defaultConfig.site_title],
-                ["site_subtitle", config.site_subtitle || defaultConfig.site_subtitle],
-                ["footer_text", config.footer_text || defaultConfig.footer_text]
+                ['site_title', config.site_title || defaultConfig.site_title],
+                ['site_subtitle', config.site_subtitle || defaultConfig.site_subtitle],
+                ['footer_text', config.footer_text || defaultConfig.footer_text]
             ])
         });
+    }
+
+    // Cập nhật hiển thị ô Link / Upload ảnh trong trang quản trị
+    const typeSelect = document.getElementById('contentType');
+    if (typeSelect) {
+        typeSelect.addEventListener('change', updateAdminFields);
+        updateAdminFields();
     }
 });

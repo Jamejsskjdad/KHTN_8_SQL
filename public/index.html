@@ -20,10 +20,16 @@
       Học tập thông minh, phát triển toàn diện
      </div> 
     </div>
-    <nav><button class="nav-btn active" onclick="showPage('home')">🏠 Trang chủ</button> <button class="nav-btn" onclick="showPage('videos')">🎥 Video</button> <button class="nav-btn" onclick="showPage('comics')">📚 Truyện tranh</button> <button class="nav-btn" onclick="window.open('https://notebooklm.google.com/notebook/7af22acf-aca8-41a7-97db-934b76532ecb?artifactId=c492a6bc-bdbf-4f69-a74b-cd481da272ea', '_blank')">
-  🎴 Flashcard
-</button>
- <button class="nav-btn" onclick="showPage('games')">🎮 Game</button> <button class="nav-btn" onclick="showPage('experiments')">🔬 Thí nghiệm</button> <button class="nav-btn" onclick="showPage('quizzes')">📝 Trắc nghiệm</button> <button class="nav-btn" onclick="showPage('admin')">⚙️ Quản trị</button>
+    <nav><button class="nav-btn active" onclick="showPage('home')">🏠 Trang chủ</button> <button class="nav-btn" onclick="showPage('videos')">🎥 Video</button> 
+    <button class="nav-btn" onclick="showPage('comics')">📚 Truyện tranh</button> 
+    <button class="nav-btn" onclick="window.open('https://notebooklm.google.com/notebook/7af22acf-aca8-41a7-97db-934b76532ecb?artifactId=c492a6bc-bdbf-4f69-a74b-cd481da272ea', '_blank')">
+      🎴 Flashcard
+    </button>
+    <button class="nav-btn" onclick="showPage('games')">🎮 Game</button> 
+    <button class="nav-btn" onclick="showPage('experiments')">🔬 Thí nghiệm</button> 
+    <button class="nav-btn" onclick="showPage('quizzes')">📝 Trắc nghiệm</button> 
+    <button class="nav-btn" onclick="showPage('inforgraphic')"> Inforgraphic</button>
+    <button class="nav-btn" onclick="showPage('admin')">⚙️ Quản trị</button>
     </nav>
    </div>
   </header><!-- Chatbot Bubble -->
@@ -90,6 +96,15 @@
         Kiểm tra kiến thức với các bài trắc nghiệm đa dạng
        </div><button class="card-btn">Khám phá ngay</button>
       </div>
+      <div class="card" onclick="showPage('inforgraphic')">
+        <div class="card-title">
+          Thẻ Inforgraphic
+        </div>
+        <div class="card-description">
+          Xem các inforgraphic trực quan tổng hợp kiến thức KHTN 8
+        </div>
+        <button class="card-btn">Khám phá ngay</button>
+      </div>
      </div>
     </div><!-- Videos Page -->
     <div id="videos" class="page">
@@ -115,7 +130,13 @@
     <div id="quizzes" class="page">
      <h1 class="page-title">📝 Trắc Nghiệm</h1>
      <div id="quizzesGrid" class="cards-grid"></div>
-    </div><!-- Detail Page -->
+    </div>
+    <!-- Inforgraphic Page -->
+    <div id="inforgraphic" class="page">
+      <h1 class="page-title"> Inforgraphic</h1>
+      <div id="inforgraphicGrid" class="cards-grid"></div>
+    </div>
+    <!-- Detail Page -->
     <div id="detail" class="page">
      <div class="detail-page">
       <div class="detail-header">
@@ -128,14 +149,35 @@
      <h1 class="page-title">⚙️ Quản Trị Nội Dung</h1>
      <div class="admin-form">
       <form id="adminForm" onsubmit="handleSubmit(event)">
-       <div class="form-group"><label for="contentType">Loại nội dung *</label> <select id="contentType" required> <option value="">-- Chọn loại --</option> <option value="videos">Video bài học</option> <option value="comics">Truyện tranh</option> <option value="flashcards">Thẻ Flashcard</option> <option value="games">Game</option> <option value="experiments">Thí nghiệm</option> <option value="quizzes">Trắc nghiệm</option> </select>
+       <div class="form-group"><label for="contentType">Loại nội dung *</label> 
+        <select id="contentType" required> 
+          <option value="">-- Chọn loại --</option> 
+          <option value="videos">Video bài học</option> 
+          <option value="comics">Truyện tranh</option> 
+          <option value="flashcards">Thẻ Flashcard</option> 
+          <option value="games">Game</option> 
+          <option value="experiments">Thí nghiệm</option> 
+          <option value="quizzes">Trắc nghiệm</option> 
+          <option value="inforgraphic">Thẻ Inforgraphic</option>
+        </select>
        </div>
        <div class="form-group"><label for="contentTitle">Tiêu đề *</label> <input type="text" id="contentTitle" placeholder="Nhập tiêu đề" required>
        </div>
        <div class="form-group"><label for="contentDescription">Mô tả ngắn *</label> <textarea id="contentDescription" placeholder="Nhập mô tả ngắn" required></textarea>
        </div>
-       <div class="form-group"><label for="contentLink">Liên kết (URL) *</label> <input type="url" id="contentLink" placeholder="https://example.com" required>
-       </div><button type="submit" class="submit-btn" id="submitBtn">Thêm mới</button>
+       <!-- THÊM id="contentLinkGroup" VÀO DIV NÀY -->
+        <div class="form-group" id="contentLinkGroup">
+          <label for="contentLink">Liên kết (URL) *</label> 
+          <input type="url" id="contentLink" placeholder="https://example.com" required>
+        </div>
+
+        <!-- NHÓM IMPORT ẢNH (bạn đã đúng id="contentImageGroup" & contentImage rồi) -->
+        <div class="form-group" id="contentImageGroup" style="display: none;">
+          <label for="contentImage">Ảnh Inforgraphic (PNG/JPG) *</label>
+          <input type="file" id="contentImage" accept="image/png,image/jpeg">
+        </div>
+
+       <button type="submit" class="submit-btn" id="submitBtn">Thêm mới</button>
       </form>
      </div>
     </div>
