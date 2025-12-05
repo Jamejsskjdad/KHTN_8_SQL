@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="vi">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website học KHTN lớp 8</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="page.js"></script>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body><!-- Floating Background Icons -->
+  <div id="floatingIcons"></div><!-- Header -->
+  <header>
+   <div class="header-content">
+    <div>
+     <div class="logo" id="siteTitle">
+      WEBSITE HỖ TRỢ HỌC KHTN 8
+     </div>
+     <div class="subtitle" id="siteSubtitle">
+      Học tập thông minh, phát triển toàn diện
+     </div> 
+    </div>
+    <nav><button class="nav-btn active" onclick="showPage('home')">🏠 Trang chủ</button> <button class="nav-btn" onclick="showPage('videos')">🎥 Video</button> <button class="nav-btn" onclick="showPage('comics')">📚 Truyện tranh</button> <button class="nav-btn" onclick="window.open('https://notebooklm.google.com/notebook/7af22acf-aca8-41a7-97db-934b76532ecb?artifactId=c492a6bc-bdbf-4f69-a74b-cd481da272ea', '_blank')">
+  🎴 Flashcard
+</button>
+ <button class="nav-btn" onclick="showPage('games')">🎮 Game</button> <button class="nav-btn" onclick="showPage('experiments')">🔬 Thí nghiệm</button> <button class="nav-btn" onclick="showPage('quizzes')">📝 Trắc nghiệm</button> <button class="nav-btn" onclick="showPage('admin')">⚙️ Quản trị</button>
+    </nav>
+   </div>
+  </header><!-- Chatbot Bubble -->
+  <div class="chatbot-bubble" onclick="openChatbot()"></div><!-- Chatbot Modal -->
+  <div class="chatbot-modal" id="chatbotModal">
+   <div class="chatbot-content"><button class="chatbot-close" onclick="closeChatbot()">×</button> <iframe class="chatbot-iframe" src="https://mindmaid.ai/vi/preview-section/tSToSbtJQRGUjA4j5d7DPb"></iframe>
+   </div>
+  </div><!-- Main Content -->
+  <main>
+   <div class="container"><!-- Home Page -->
+    <div id="home" class="page active">
+     <h1 class="page-title">Chào mừng đến với Website học KHTN lớp 8</h1>
+     <div class="cards-grid">
+      <div class="card" onclick="showPage('videos')">
+       <div class="card-title">
+        🎥 Video Bài Học
+       </div>
+       <div class="card-description">
+        Xem các video bài giảng minh họa bài học trực quan
+       </div><button class="card-btn">Khám phá ngay</button>
+      </div>
+      <div class="card" onclick="showPage('comics')">
+       <div class="card-title">
+        📚 Truyện Tranh
+       </div>
+       <div class="card-description">
+        Học qua truyện tranh minh họa đầy màu sắc và thú vị
+       </div><button class="card-btn">Khám phá ngay</button>
+      </div>
+      <div class="card">
+       <div class="card-title">
+        🎴 Thẻ Flashcard
+       </div>
+       <div class="card-description">
+        Ghi nhớ kiến thức nhanh chóng với thẻ học tập thông minh
+       </div>
+       <button class="card-btn" 
+        onclick="window.open('https://notebooklm.google.com/notebook/7af22acf-aca8-41a7-97db-934b76532ecb?artifactId=c492a6bc-bdbf-4f69-a74b-cd481da272ea', '_blank')">
+            Khám phá ngay
+        </button>
+
+      </div>
+      <div class="card" onclick="showPage('games')">
+       <div class="card-title">
+        🎮 Game Học Tập
+       </div>
+       <div class="card-description">
+        Học mà chơi, chơi mà học với các trò chơi giáo dục
+       </div><button class="card-btn">Khám phá ngay</button>
+      </div>
+      <div class="card" onclick="showPage('experiments')">
+       <div class="card-title">
+        🔬 Thí Nghiệm
+       </div>
+       <div class="card-description">
+        Khám phá khoa học qua các thí nghiệm tương tác
+       </div><button class="card-btn">Khám phá ngay</button>
+      </div>
+      <div class="card" onclick="showPage('quizzes')">
+       <div class="card-title">
+        📝 Trắc Nghiệm
+       </div>
+       <div class="card-description">
+        Kiểm tra kiến thức với các bài trắc nghiệm đa dạng
+       </div><button class="card-btn">Khám phá ngay</button>
+      </div>
+     </div>
+    </div><!-- Videos Page -->
+    <div id="videos" class="page">
+     <h1 class="page-title">🎥 Video Bài Học</h1>
+     <div id="videosGrid" class="cards-grid"></div>
+    </div><!-- Comics Page -->
+    <div id="comics" class="page">
+     <h1 class="page-title">📚 Truyện Tranh</h1>
+     <div id="comicsGrid" class="cards-grid"></div>
+    </div><!-- Flashcards Page -->
+    <div id="flashcards" class="page">
+     <h1 class="page-title">🎴 Thẻ Flashcard</h1>
+     <div id="flashcardsGrid" class="cards-grid"></div>
+    </div><!-- Games Page -->
+    <div id="games" class="page">
+     <h1 class="page-title">🎮 Game Học Tập</h1>
+     <div id="gamesGrid" class="cards-grid"></div>
+    </div><!-- Experiments Page -->
+    <div id="experiments" class="page">
+     <h1 class="page-title">🔬 Thí Nghiệm</h1>
+     <div id="experimentsGrid" class="cards-grid"></div>
+    </div><!-- Quizzes Page -->
+    <div id="quizzes" class="page">
+     <h1 class="page-title">📝 Trắc Nghiệm</h1>
+     <div id="quizzesGrid" class="cards-grid"></div>
+    </div><!-- Detail Page -->
+    <div id="detail" class="page">
+     <div class="detail-page">
+      <div class="detail-header">
+       <h2 class="detail-title" id="detailTitle"></h2><button class="back-btn" onclick="goBack()">← Quay lại</button>
+      </div>
+      <p class="detail-description" id="detailDescription"></p><iframe id="detailIframe" class="content-iframe"></iframe>
+     </div>
+    </div><!-- Admin Page -->
+    <div id="admin" class="page">
+     <h1 class="page-title">⚙️ Quản Trị Nội Dung</h1>
+     <div class="admin-form">
+      <form id="adminForm" onsubmit="handleSubmit(event)">
+       <div class="form-group"><label for="contentType">Loại nội dung *</label> <select id="contentType" required> <option value="">-- Chọn loại --</option> <option value="videos">Video bài học</option> <option value="comics">Truyện tranh</option> <option value="flashcards">Thẻ Flashcard</option> <option value="games">Game</option> <option value="experiments">Thí nghiệm</option> <option value="quizzes">Trắc nghiệm</option> </select>
+       </div>
+       <div class="form-group"><label for="contentTitle">Tiêu đề *</label> <input type="text" id="contentTitle" placeholder="Nhập tiêu đề" required>
+       </div>
+       <div class="form-group"><label for="contentDescription">Mô tả ngắn *</label> <textarea id="contentDescription" placeholder="Nhập mô tả ngắn" required></textarea>
+       </div>
+       <div class="form-group"><label for="contentLink">Liên kết (URL) *</label> <input type="url" id="contentLink" placeholder="https://example.com" required>
+       </div><button type="submit" class="submit-btn" id="submitBtn">Thêm mới</button>
+      </form>
+     </div>
+    </div>
+   </div>
+  </main><!-- Footer -->
+  <footer>
+   <p id="footerText">© 2025 Website Học Tập. Tất cả quyền được bảo lưu.</p>
+  </footer>
+  
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f5b5a727da9ed4',t:'MTc2MzI4MjY5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
