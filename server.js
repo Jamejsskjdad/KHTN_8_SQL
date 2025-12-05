@@ -3,15 +3,23 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 
+const authRoutes = require('./backend/auth/routes');
+// sau này thêm:
+const studentRoutes = require('./backend/student/routes');
+const adminRoutes = require('./backend/admin/routes');
+
 const app = express();
 const PORT = 3000;
 
-// Đọc JSON body (không ảnh hưởng tới multipart/form-data)
-app.use(express.json());
+app.use(express.json());  // để đọc body JSON
 
-// Serve static: index.html, css, js...
+// static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+// mount API
+app.use('/api/auth', authRoutes);
+app.use('/api/student', studentRoutes);
+app.use('/api/admin', adminRoutes);
 // Thư mục dữ liệu chung
 const DATA_DIR = path.join(__dirname, 'data');
 
