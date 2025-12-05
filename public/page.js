@@ -73,7 +73,7 @@ function renderAllContent() {
             if (type === 'inforgraphic') {
                 grid.innerHTML = items.map(item => `
                     <div class="card">
-                        <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️</button>
+                        <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️🗑️</button>
                         <div class="card-title">${item.title}</div>
                         <img src="${item.link}" alt="${item.title}"
                              style="width:100%;border-radius:8px;margin:10px 0;">
@@ -84,7 +84,7 @@ function renderAllContent() {
                 // Các loại khác giữ nguyên cách hiển thị
                 grid.innerHTML = items.map(item => `
                     <div class="card">
-                        <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️</button>
+                        <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️🗑️</button>
                         <div class="card-title">${typeIcons[type] || ''} ${item.title}</div>
                         <button class="card-btn" onclick="openLink(event, '${item.link}')">Xem ngay</button>
                     </div>
