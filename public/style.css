@@ -42,7 +42,7 @@ body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding-top: 10px;  
     position: relative;
     z-index: 1;
 }
@@ -146,7 +146,17 @@ body {
     flex-direction: column;
     gap: 2px;
 }
-
+#floatingIcons {
+    position: fixed;      /* hoặc absolute nếu bạn muốn bám theo page */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100vh;        /* khóa trong khung màn hình */
+    pointer-events: none; /* không cản click vào nội dung */
+    overflow: hidden;     /* icon bay ra ngoài không làm tăng height */
+    z-index: 0;
+  }
+  
 .card .card-author {
     font-weight: 500;
 }
@@ -323,7 +333,8 @@ body {
 
 main {
     min-height: calc(100% - 200px);
-    padding: 40px 0;
+    padding-top: 16px;   /* trước là 40px */
+    padding-bottom: 40px;
 }
 
 .page {
@@ -337,7 +348,8 @@ main {
 .page-title {
     color: white;
     font-size: 32px;
-    margin-bottom: 30px;
+    margin-top: 0;       /* rất quan trọng */
+    margin-bottom: 24px; 
     text-align: center;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
 }
