@@ -267,37 +267,65 @@ async function handleSubmit(event) {
       return;
     }
   
-    // 1. STUDENT: GỬI REQUEST VỀ BẢNG Posts (PENDING)
+    // ===== 1. STUDENT: gửi request pending cho admin =====
     if (authRole === 'user') {
-      try {
-        // với infographic hiện tại ta chỉ gửi tiêu đề + type, linkOrImage có thể để null
+        try {
+        // Nếu là infographic: upload ảnh lên /api/student/posts/infographic
+        if (type === 'inforgraphic') {
+            if (!imageFile) {
+            alert('Vui lòng chọn ảnh infographic.');
+            return;
+            }
+    
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('image', imageFile);
+    
+            const res = await fetch('/api/student/posts/infographic', {
+            method: 'POST',
+            headers: {
+                'Authorization': authToken ? 'Bearer ' + authToken : ''
+                // KHÔNG set Content-Type, để browser tự đặt multipart/form-data
+            },
+            body: formData
+            });
+    
+            const data = await res.json();
+            if (!res.ok) {
+            throw new Error(data.error || 'Gửi bài thất bại');
+            }
+    
+            alert('Bài infographic của bạn đã được gửi cho quản trị viên để duyệt.');
+            event.target.reset();
+            return;
+        }
+    
+        // Các loại khác: gửi JSON như cũ
         const res = await fetch('/api/student/posts', {
-          method: 'POST',
-          headers: {
+            method: 'POST',
+            headers: {
             'Content-Type': 'application/json',
             'Authorization': authToken ? 'Bearer ' + authToken : ''
-          },
-          body: JSON.stringify({
+            },
+            body: JSON.stringify({
             title,
             type,
-            // nếu bạn có dùng link cho các loại khác thì giữ như này:
-            linkOrImage: link || null
-          })
+            linkOrImage: link || null,
+            })
         });
-  
+    
         const data = await res.json();
         if (!res.ok) {
-          throw new Error(data.error || 'Gửi bài thất bại');
+            throw new Error(data.error || 'Gửi bài thất bại');
         }
-  
-        // ✅ THÔNG BÁO SAU KHI INSERT THÀNH CÔNG
+    
         alert('Bài đăng của bạn đã được gửi cho quản trị viên để duyệt.');
         event.target.reset();
-      } catch (err) {
+        } catch (err) {
         console.error(err);
         alert(err.message || 'Lỗi gửi bài, vui lòng thử lại.');
-      }
-      return;
+        }
+        return;
     }
   
     // 2. ADMIN: ĐĂNG TRỰC TIẾP VÀO /api/content (THƯ MỤC data/)
