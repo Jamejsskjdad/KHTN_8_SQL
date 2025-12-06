@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Profile</title>
+  <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Trang cá nhân Học sinh</h1>
+      <nav class="nav">
+        <a href="/index.html">🏠 Trang chính</a>
+        <button id="logoutBtn">Đăng xuất</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="card" id="profileCard">
+        <h2>Thông tin tài khoản</h2>
+        <p><strong>Username:</strong> <span id="username">...</span></p>
+        <p><strong>Email:</strong> <span id="email">...</span></p>
+        <p><strong>Role:</strong> <span id="role">...</span></p>
+      </section>
+
+      <section class="card posts">
+        <h2>Các bài bạn đã gửi</h2>
+        <div id="emptyState" class="empty" style="display:none;">
+          Bạn chưa gửi bài nào.
+        </div>
+        <table id="postsTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tiêu đề</th>
+              <th>Loại</th>
+              <th>Trạng thái</th>
+              <th>Ngày gửi</th>
+            </tr>
+          </thead>
+          <tbody id="postsBody"></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('authToken');
+    const role  = localStorage.getItem('authRole');
+
+    // Student có role 'user' theo DB
+    if (!token || role !== 'user') {
+      window.location.href = '/index.html';
+    }
+
+    async function loadProfile() {
+      try {
+        const res = await fetch('/api/student/profile', {
+          headers: {
+            'Authorization': 'Bearer ' + token
+          }
+        });
+
+        if (!res.ok) throw new Error('Response not ok');
+
+        const data = await res.json();
+        document.getElementById('username').textContent = data.Username;
+        document.getElementById('email').textContent    = data.Email || '(chưa có)';
+        document.getElementById('role').textContent     = data.Role;
+      } catch (err) {
+        console.error(err);
+        alert('Lỗi tải profile student');
+      }
+    }
+
+    async function loadMyPosts() {
+      try {
+        const res = await fetch('/api/student/my-posts', {
+          headers: {
+            'Authorization': 'Bearer ' + token
+          }
+        });
+
+        if (!res.ok) throw new Error('Response not ok');
+
+        const data = await res.json();
+        const tbody = document.getElementById('postsBody');
+        const empty = document.getElementById('emptyState');
+        tbody.innerHTML = '';
+
+        if (!data || data.length === 0) {
+          empty.style.display = 'block';
+          return;
+        } else {
+          empty.style.display = 'none';
+        }
+
+        data.forEach(post => {
+          const tr = document.createElement('tr');
+
+          const createdAt = post.CreatedAt
+            ? new Date(post.CreatedAt).toLocaleString('vi-VN')
+            : '';
+
+          tr.innerHTML = `
+            <td>${post.PostId}</td>
+            <td>${post.Title}</td>
+            <td>${post.Type}</td>
+            <td>${post.Status}</td>
+            <td>${createdAt}</td>
+          `;
+
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+        alert('Lỗi tải danh sách bài đã gửi');
+      }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('authRole');
+      window.location.href = '/index.html';
+    });
+
+    loadProfile();
+    loadMyPosts();
+  </script>
+</body>
+</html>

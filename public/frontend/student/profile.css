@@ -1,0 +1,110 @@
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #36d1dc, #5b86e5);
+  }
+  
+  .container {
+    max-width: 1000px;
+    margin: 36px auto;
+    padding: 0 20px;
+  }
+  
+  .header {
+    background: #fff;
+    padding: 14px 22px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .header h1 {
+    margin: 0;
+    font-size: 22px;
+    color: #333;
+  }
+  
+  .nav {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .nav a {
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: #1890ff;
+    color: white;
+    font-size: 14px;
+  }
+  
+  .nav a:hover {
+    background: #096dd9;
+  }
+  
+  #logoutBtn {
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: none;
+    background: #ff4d4f;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  #logoutBtn:hover {
+    background: #d9363e;
+  }
+  
+  .card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 20px 22px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.16);
+    margin-bottom: 20px;
+  }
+  
+  .card h2 {
+    margin-top: 0;
+  }
+  
+  .card p {
+    margin: 6px 0;
+    font-size: 15px;
+  }
+  
+  .posts table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  
+  .posts th,
+  .posts td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+  }
+  
+  .posts thead {
+    background: #f5fbff;
+    font-weight: 600;
+  }
+  
+  .posts tr:hover td {
+    background: #f8fbff;
+  }
+  
+  .empty {
+    padding: 14px;
+    border-radius: 10px;
+    background: #fffbe6;
+    border: 1px dashed #ffe58f;
+    color: #ad8b00;
+    font-size: 14px;
+  }
+  

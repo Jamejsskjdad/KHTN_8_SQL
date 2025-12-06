@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - Duyệt bài</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Dashboard duyệt bài</h1>
+      <nav class="nav">
+        <a href="/index.html">🏠 Trang chính</a>
+        <a href="/frontend/admin/profile.html">👤 Profile</a>
+        <button id="logoutBtn">Đăng xuất</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>Bài chờ duyệt</h2>
+        <p class="hint">Các bài do học sinh gửi lên với trạng thái <b>pending</b>.</p>
+
+        <div id="emptyState" class="empty" style="display:none;">
+          Hiện chưa có bài nào chờ duyệt.
+        </div>
+
+        <table id="postsTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tiêu đề</th>
+              <th>Loại</th>
+              <th>Người gửi</th>
+              <th>Ngày gửi</th>
+              <th>Link/Ảnh</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody id="postsBody">
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('authToken');
+    const role  = localStorage.getItem('authRole');
+
+    if (!token || role !== 'admin') {
+      window.location.href = '/index.html';
+    }
+
+    async function loadPendingPosts() {
+      try {
+        const res = await fetch('/api/admin/posts/pending', {
+          headers: {
+            'Authorization': 'Bearer ' + token
+          }
+        });
+
+        if (!res.ok) {
+          throw new Error('Response not ok');
+        }
+
+        const data = await res.json();
+        const tbody = document.getElementById('postsBody');
+        const empty = document.getElementById('emptyState');
+        tbody.innerHTML = '';
+
+        if (!data || data.length === 0) {
+          empty.style.display = 'block';
+          return;
+        } else {
+          empty.style.display = 'none';
+        }
+
+        data.forEach(post => {
+          const tr = document.createElement('tr');
+
+          const createdAt = post.CreatedAt
+            ? new Date(post.CreatedAt).toLocaleString('vi-VN')
+            : '';
+
+          tr.innerHTML = `
+            <td>${post.PostId}</td>
+            <td>${post.Title}</td>
+            <td>${post.Type}</td>
+            <td>${post.CreatedBy || ''}</td>
+            <td>${createdAt}</td>
+            <td>
+              ${post.LinkOrImage 
+                ? `<a href="${post.LinkOrImage}" target="_blank" rel="noopener noreferrer">Mở</a>`
+                : ''}
+            </td>
+            <td>
+              <button class="approve-btn" data-id="${post.PostId}">Duyệt</button>
+            </td>
+          `;
+
+          tbody.appendChild(tr);
+        });
+
+        // Gán sự kiện cho các nút Duyệt
+        document.querySelectorAll('.approve-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const id = e.target.getAttribute('data-id');
+            if (!confirm('Duyệt bài #' + id + ' ?')) return;
+            await approvePost(id);
+          });
+        });
+
+      } catch (err) {
+        console.error(err);
+        alert('Lỗi tải danh sách bài pending');
+      }
+    }
+
+    async function approvePost(id) {
+      try {
+        const res = await fetch('/api/admin/posts/' + id + '/approve', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + token
+          }
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Lỗi duyệt bài');
+        }
+
+        // reload danh sách
+        await loadPendingPosts();
+        alert('Duyệt bài thành công');
+      } catch (err) {
+        console.error(err);
+        alert(err.message || 'Lỗi duyệt bài');
+      }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('authRole');
+      window.location.href = '/index.html';
+    });
+
+    loadPendingPosts();
+  </script>
+</body>
+</html>

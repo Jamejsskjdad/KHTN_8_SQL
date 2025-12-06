@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Đăng nhập - KHTN 8</title>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <div class="wrapper">
+    <div class="card">
+      <h1>Đăng nhập hệ thống</h1>
+      <p class="subtitle">Website hỗ trợ học KHTN 8</p>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Tài khoản</label>
+          <input type="text" id="username" placeholder="Nhập tên đăng nhập" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Mật khẩu</label>
+          <input type="password" id="password" placeholder="Nhập mật khẩu" required>
+        </div>
+
+        <div id="errorBox" class="error" style="display:none;"></div>
+
+        <button type="submit" class="btn primary">Đăng nhập</button>
+      </form>
+
+      <div class="divider">
+        <span>hoặc</span>
+      </div>
+
+      <button id="guestBtn" class="btn ghost">
+        Tiếp tục với tư cách <b>Khách</b>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById('loginForm');
+    const errorBox  = document.getElementById('errorBox');
+    const guestBtn  = document.getElementById('guestBtn');
+
+    // Nếu đã có role rồi thì cho về thẳng trang tương ứng
+    (function() {
+      const role = localStorage.getItem('authRole');
+      if (role === 'admin') {
+        window.location.href = '/frontend/admin/profile.html';
+      } else if (role === 'user') {
+        window.location.href = '/frontend/student/profile.html';
+      }
+      // guest thì cho ở lại login, để người ta có thể đăng nhập "thật" nếu muốn
+    })();
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorBox.style.display = 'none';
+      errorBox.textContent = '';
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!username || !password) {
+        errorBox.textContent = 'Vui lòng nhập đủ tài khoản và mật khẩu.';
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Đăng nhập thất bại');
+        }
+
+        // Lưu token & role
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('authRole',  data.role);      // 'admin' hoặc 'user'
+        localStorage.setItem('authUsername', data.username);
+
+        // Điều hướng theo role
+        if (data.role === 'admin') {
+          window.location.href = '/frontend/admin/profile.html';
+        } else if (data.role === 'user') {
+          window.location.href = '/frontend/student/profile.html';
+        } else {
+          // nếu vì lý do gì role khác thì cho về trang chính
+          window.location.href = '/index.html';
+        }
+
+      } catch (err) {
+        console.error(err);
+        errorBox.textContent = err.message || 'Đăng nhập thất bại, thử lại sau.';
+        errorBox.style.display = 'block';
+      }
+    });
+
+    // Đăng nhập với tư cách khách
+    guestBtn.addEventListener('click', () => {
+      localStorage.removeItem('authToken');
+      localStorage.setItem('authRole', 'guest');
+      window.location.href = '/index.html';
+    });
+  </script>
+</body>
+</html>

@@ -2,10 +2,24 @@
 const express = require('express');
 const { getPool } = require('../db');
 const { requireAuth } = require('../auth/middleware');
+const { getProfile, getMyPosts } = require('./profile');
 
 const router = express.Router();
 
-// User gửi bài mới (pending)
+/**
+ * GET /api/student/profile
+ */
+router.get('/profile', requireAuth, getProfile);
+
+/**
+ * GET /api/student/my-posts
+ */
+router.get('/my-posts', requireAuth, getMyPosts);
+
+/**
+ * POST /api/student/posts
+ * User gửi bài mới (pending)
+ */
 router.post('/posts', requireAuth, async (req, res) => {
   const { title, type, linkOrImage } = req.body;
 
@@ -15,6 +29,7 @@ router.post('/posts', requireAuth, async (req, res) => {
 
   try {
     const pool = await getPool();
+
     await pool.request()
       .input('userId', req.user.userId)
       .input('title', title)
@@ -27,7 +42,7 @@ router.post('/posts', requireAuth, async (req, res) => {
 
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    console.error('Lỗi student gửi bài:', err);
     res.status(500).json({ error: 'Lỗi server' });
   }
 });
