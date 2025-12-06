@@ -2,151 +2,268 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Dashboard - Duyệt bài</title>
+  <title>Dashboard duyệt bài</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <h1>Dashboard duyệt bài</h1>
-      <nav class="nav">
-        <a href="/index.html">🏠 Trang chính</a>
-        <a href="/frontend/admin/profile.html">👤 Profile</a>
-        <button id="logoutBtn">Đăng xuất</button>
-      </nav>
+<div class="db-root">
+
+  <!-- SIDEBAR -->
+  <aside class="db-sidebar">
+    <header class="db-sidebar-header">
+      <div class="db-sidebar-avatar">A</div>
+      <div class="db-sidebar-text">
+        <div class="db-sidebar-title">Admin Panel</div>
+        <div class="db-sidebar-subtitle">Duyệt nội dung học tập</div>
+      </div>
     </header>
 
-    <main>
-      <section class="card">
-        <h2>Bài chờ duyệt</h2>
-        <p class="hint">Các bài do học sinh gửi lên với trạng thái <b>pending</b>.</p>
+    <nav class="db-sidebar-nav">
+      <button class="db-nav-item" id="navHome" type="button">
+        <span class="db-nav-icon">🏠</span>
+        <span>Trang chủ</span>
+      </button>
+      
+      <!-- trạng thái: bài chờ duyệt (pending) -->
+      <button class="db-nav-item db-nav-item--active"
+              id="navPending"
+              data-status="pending">
+        <span class="db-nav-icon">📝</span>
+        <span>Danh sách bài chờ duyệt</span>
+      </button>
+    
+      <!-- trạng thái: đã duyệt -->
+      <button class="db-nav-item"
+              id="navApproved"
+              data-status="approved">
+        <span class="db-nav-icon">✅</span>
+        <span>Bài đã duyệt</span>
+      </button>
+    
+      <!-- trạng thái: bị từ chối -->
+      <button class="db-nav-item"
+              id="navRejected"
+              data-status="rejected">
+        <span class="db-nav-icon">🚫</span>
+        <span>Bài bị từ chối</span>
+      </button>
+    
+      <div class="db-nav-section-label">Quản lý</div>
+    
+      <button class="db-nav-item">
+        <span class="db-nav-icon">👥</span>
+        <span>Người dùng</span>
+      </button>
+    </nav>
+    
 
-        <div id="emptyState" class="empty" style="display:none;">
-          Hiện chưa có bài nào chờ duyệt.
+    <footer class="db-sidebar-footer">
+      © 2025 Admin Review Dashboard
+    </footer>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="db-main">
+
+    <!-- HEADER -->
+    <header class="db-header">
+      <div class="db-header-left">
+        <h1 class="db-header-title">Dashboard duyệt bài</h1>
+        <p class="db-header-subtitle">
+          Quản lý và phê duyệt nội dung do người dùng gửi lên.
+        </p>
+      </div>
+
+      <div class="db-header-right">
+        <form class="db-search-box" onsubmit="return false;">
+          <span class="db-search-icon">🔍</span>
+          <input id="searchInput" type="text"
+                 placeholder="Tìm theo tiêu đề, ID, người gửi..."
+                 oninput="handleSearch(this.value)">
+        </form>
+
+        <!-- Nếu không cần chuông thông báo, có thể bỏ button này -->
+        <button class="db-notif-btn" type="button" title="Thông báo">
+          🔔
+          <span class="db-notif-badge">3</span>
+        </button>
+
+        <div class="db-profile-pill">
+          <div class="db-profile-avatar">AD</div>
+          <div class="db-profile-text">
+            <div class="db-profile-name">Admin</div>
+            <div class="db-profile-role">Super moderator</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="db-content">
+
+      <!-- THỐNG KÊ NHANH -->
+      <section class="db-section">
+        <h2 class="db-section-title">Thống kê nhanh</h2>
+        <div class="db-metrics-grid">
+          <article class="db-metric-card">
+            <div class="db-metric-icon db-metric-icon--blue">⏳</div>
+            <div>
+              <div class="db-metric-label">Bài chờ duyệt</div>
+              <div id="metricPending" class="db-metric-value">0</div>
+            </div>
+          </article>
+
+          <article class="db-metric-card">
+            <div class="db-metric-icon db-metric-icon--green">✅</div>
+            <div>
+              <div class="db-metric-label">Bài đã duyệt</div>
+              <div id="metricApproved" class="db-metric-value">0</div>
+            </div>
+          </article>
+
+          <article class="db-metric-card">
+            <div class="db-metric-icon db-metric-icon--red">❌</div>
+            <div>
+              <div class="db-metric-label">Bài bị từ chối</div>
+              <div id="metricRejected" class="db-metric-value">0</div>
+            </div>
+          </article>
+
+          <article class="db-metric-card">
+            <div class="db-metric-icon db-metric-icon--cyan">👥</div>
+            <div>
+              <div class="db-metric-label">Người dùng hoạt động</div>
+              <div id="metricUsers" class="db-metric-value">0</div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- DANH SÁCH BÀI CHỜ DUYỆT -->
+      <section class="db-section db-section--table">
+        <div class="db-table-header">
+          <div class="db-table-header-left">
+            <h2 class="db-section-title">Danh sách bài chờ duyệt</h2>
+            <span id="badgeTotal" class="db-badge">0 bài</span>
+          </div>
+
+          <div class="db-table-filters">
+            <div class="db-filter">
+              <label for="filterType">Loại:</label>
+              <select id="filterType" onchange="applyFilters()">
+                <option value="all">Tất cả</option>
+                <option value="videos">Video</option>
+                <option value="comics">Truyện tranh</option>
+                <option value="flashcards">Flashcard</option>
+                <option value="experiments">Thí nghiệm</option>
+                <option value="games">Game</option>
+                <option value="inforgraphic">Infographic</option>
+              </select>
+            </div>
+
+            <div class="db-filter">
+              <label for="filterStatus">Trạng thái:</label>
+              <select id="filterStatus" onchange="applyFilters()">
+                <option value="all">Tất cả</option>
+                <option value="pending">Chờ duyệt</option>
+                <option value="approved">Đã duyệt</option>
+                <option value="rejected">Bị từ chối</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <table id="postsTable">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Tiêu đề</th>
-              <th>Loại</th>
-              <th>Người gửi</th>
-              <th>Ngày gửi</th>
-              <th>Link/Ảnh</th>
-              <th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody id="postsBody">
-          </tbody>
-        </table>
+        <div class="db-table-wrapper">
+          <table class="db-table">
+            <thead>
+              <tr>
+                <th>ID bài</th>
+                <th>Tiêu đề bài</th>
+                <th>Loại nội dung</th>
+                <th>Người gửi</th>
+                <th>Thời gian gửi</th>
+                <th>Trạng thái</th>
+                <th class="db-th-actions">Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="submissionsBody">
+            <!-- hàng mẫu sẽ được render bằng JS để dễ thay thế backend -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="emptyState" class="db-empty-state" style="display:none;">
+          Không có bài nào khớp bộ lọc hiện tại.
+        </div>
       </section>
+
     </main>
   </div>
 
-  <script>
-    const token = localStorage.getItem('authToken');
-    const role  = localStorage.getItem('authRole');
+</div>
 
-    if (!token || role !== 'admin') {
-      window.location.href = '/index.html';
-    }
+<!-- MODAL CHI TIẾT (FRONTEND DEMO, BACKEND SAU NỐI VÀO) -->
+<div id="detailBackdrop" class="db-modal-backdrop" style="display:none;">
+  <div class="db-modal">
+    <header class="db-modal-header">
+      <div>
+        <div class="db-modal-subtitle">Xem chi tiết bài <span id="detailId"></span></div>
+        <h3 id="detailTitle" class="db-modal-title">Tiêu đề bài</h3>
+      </div>
+      <button type="button" class="db-btn-icon" onclick="closeDetailModal()">✕</button>
+    </header>
 
-    async function loadPendingPosts() {
-      try {
-        const res = await fetch('/api/admin/posts/pending', {
-          headers: {
-            'Authorization': 'Bearer ' + token
-          }
-        });
+    <div class="db-modal-body">
+      <section>
+        <h4 class="db-modal-section-title">Preview nội dung</h4>
+        <div id="detailPreview" class="db-preview-box">
+          <!-- demo preview -->
+        </div>
+      </section>
 
-        if (!res.ok) {
-          throw new Error('Response not ok');
-        }
+      <section class="db-modal-grid">
+        <div>
+          <h4 class="db-modal-label">Tiêu đề</h4>
+          <p id="detailTitleText"></p>
 
-        const data = await res.json();
-        const tbody = document.getElementById('postsBody');
-        const empty = document.getElementById('emptyState');
-        tbody.innerHTML = '';
+          <h4 class="db-modal-label">Mô tả</h4>
+          <p id="detailDescription"></p>
 
-        if (!data || data.length === 0) {
-          empty.style.display = 'block';
-          return;
-        } else {
-          empty.style.display = 'none';
-        }
+          <h4 class="db-modal-label">Loại bài</h4>
+          <span id="detailType" class="db-pill db-pill--blue"></span>
+        </div>
 
-        data.forEach(post => {
-          const tr = document.createElement('tr');
+        <div>
+          <h4 class="db-modal-label">Link / file đính kèm</h4>
+          <p id="detailLink" class="db-link"></p>
 
-          const createdAt = post.CreatedAt
-            ? new Date(post.CreatedAt).toLocaleString('vi-VN')
-            : '';
+          <h4 class="db-modal-label">Người gửi</h4>
+          <p id="detailAuthor"></p>
 
-          tr.innerHTML = `
-            <td>${post.PostId}</td>
-            <td>${post.Title}</td>
-            <td>${post.Type}</td>
-            <td>${post.CreatedBy || ''}</td>
-            <td>${createdAt}</td>
-            <td>
-              ${post.LinkOrImage 
-                ? `<a href="${post.LinkOrImage}" target="_blank" rel="noopener noreferrer">Mở</a>`
-                : ''}
-            </td>
-            <td>
-              <button class="approve-btn" data-id="${post.PostId}">Duyệt</button>
-            </td>
-          `;
+          <h4 class="db-modal-label">Thời gian gửi</h4>
+          <p id="detailSubmittedAt"></p>
+        </div>
+      </section>
 
-          tbody.appendChild(tr);
-        });
+      <section>
+        <h4 class="db-modal-section-title">Ghi chú / yêu cầu chỉnh sửa</h4>
+        <textarea id="detailFeedback" rows="3"
+                  placeholder="Nhập lý do từ chối hoặc yêu cầu chỉnh sửa (nếu có)..."></textarea>
+      </section>
+    </div>
 
-        // Gán sự kiện cho các nút Duyệt
-        document.querySelectorAll('.approve-btn').forEach(btn => {
-          btn.addEventListener('click', async (e) => {
-            const id = e.target.getAttribute('data-id');
-            if (!confirm('Duyệt bài #' + id + ' ?')) return;
-            await approvePost(id);
-          });
-        });
+    <footer class="db-modal-footer">
+      <div id="detailStatusPill"></div>
+      <div class="db-modal-actions">
+        <button class="db-btn db-btn--primary" onclick="handleApprove()">✔️ Duyệt bài</button>
+        <button class="db-btn db-btn--danger" onclick="handleReject()">❌ Từ chối</button>
+        <button class="db-btn db-btn--warning" onclick="handleRequestChanges()">✏️ Gửi yêu cầu chỉnh sửa</button>
+      </div>
+    </footer>
+  </div>
+</div>
 
-      } catch (err) {
-        console.error(err);
-        alert('Lỗi tải danh sách bài pending');
-      }
-    }
-
-    async function approvePost(id) {
-      try {
-        const res = await fetch('/api/admin/posts/' + id + '/approve', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + token
-          }
-        });
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || 'Lỗi duyệt bài');
-        }
-
-        // reload danh sách
-        await loadPendingPosts();
-        alert('Duyệt bài thành công');
-      } catch (err) {
-        console.error(err);
-        alert(err.message || 'Lỗi duyệt bài');
-      }
-    }
-
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('authRole');
-      window.location.href = '/index.html';
-    });
-
-    loadPendingPosts();
-  </script>
+<script src="dashboard.js"></script>
 </body>
 </html>

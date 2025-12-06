@@ -2,6 +2,7 @@
 const { getPool } = require('../db');
 const fs = require('fs');
 const path = require('path');
+
 // ROOT project (thư mục chứa server.js)
 const ROOT_DIR = path.join(__dirname, '..', '..');
 // /data
@@ -36,7 +37,9 @@ TYPES.forEach((type) => {
 ensureFolder(INFO_IMG_DIR);
 ensureFolder(INFO_JSON_DIR);
 
-// ===== HÀM GHI ITEM VÀO data/ GIỐNG /api/content =====
+// =====================================================
+// GHI FILE JSON CHO BÀI ĐÃ DUYỆT (phục vụ website chính)
+// =====================================================
 
 function saveApprovedPostToData(post) {
   const { Type: type, Title: title, LinkOrImage } = post;
@@ -48,16 +51,11 @@ function saveApprovedPostToData(post) {
 
   const id = Date.now().toString();
 
-  // Trường hợp infographic: ở đây ta KHÔNG xử lý file ảnh,
-  // chỉ ghi JSON, link trỏ đến LinkOrImage (có thể là URL ngoài)
-  let folder;
   let link;
-
   if (type === 'inforgraphic') {
-    folder = INFO_JSON_DIR;
-    link = LinkOrImage || ''; // có thể là link ảnh / drive v.v.
+    // Với infographic: chỉ lưu JSON, link trỏ tới LinkOrImage (URL / path)
+    link = LinkOrImage || '';
   } else {
-    folder = path.join(DATA_DIR, type);
     link = LinkOrImage || '';
   }
 
@@ -80,16 +78,27 @@ function saveApprovedPostToData(post) {
   return newItem;
 }
 
-// ====== API HANDLERS ======
+// =====================================================
+// API: LẤY DANH SÁCH BÀI THEO TRẠNG THÁI
+// GET /api/admin/posts?status=pending|approved|rejected|all
+// =====================================================
 
-/**
- * GET /api/admin/posts/pending
- * Lấy danh sách bài đang chờ duyệt
- */
-async function getPendingPosts(req, res) {
+async function getPostsByStatus(req, res) {
+  const rawStatus = (req.query.status || 'all').toLowerCase();
+  const allowed = ['pending', 'approved', 'rejected'];
+  const status = allowed.includes(rawStatus) ? rawStatus : 'all';
+
   try {
     const pool = await getPool();
-    const result = await pool.request().query(`
+    const request = pool.request();
+
+    let whereClause = '';
+    if (status !== 'all') {
+      whereClause = 'WHERE p.Status = @status';
+      request.input('status', status);
+    }
+
+    const result = await request.query(`
       SELECT 
         p.PostId,
         p.Title,
@@ -100,22 +109,64 @@ async function getPendingPosts(req, res) {
         u.Username AS CreatedBy
       FROM Posts p
       JOIN Users u ON p.UserId = u.UserId
-      WHERE p.Status = 'pending'
+      ${whereClause}
       ORDER BY p.CreatedAt DESC
     `);
 
     res.json(result.recordset);
   } catch (err) {
-    console.error('Lỗi lấy bài pending:', err);
+    console.error('Lỗi lấy danh sách bài:', err);
     res.status(500).json({ error: 'Lỗi server' });
   }
 }
 
-/**
- * POST /api/admin/posts/:id/approve
- * - Đổi Status = 'approved'
- * - Ghi 1 JSON tương ứng vào thư mục data/ để website hiển thị
- */
+// =====================================================
+// API: THỐNG KÊ NHANH
+// GET /api/admin/posts/summary
+// =====================================================
+
+async function getSummary(req, res) {
+  try {
+    const pool = await getPool();
+
+    // Đếm số bài theo trạng thái
+    const postsResult = await pool.request().query(`
+      SELECT
+        SUM(CASE WHEN Status = 'pending'  THEN 1 ELSE 0 END) AS Pending,
+        SUM(CASE WHEN Status = 'approved' THEN 1 ELSE 0 END) AS Approved,
+        SUM(CASE WHEN Status = 'rejected' THEN 1 ELSE 0 END) AS Rejected
+      FROM Posts
+    `);
+
+    const row = postsResult.recordset[0] || {};
+    const pending  = row.Pending  || 0;
+    const approved = row.Approved || 0;
+    const rejected = row.Rejected || 0;
+
+    // "Người dùng hoạt động" – ở đây tạm tính số user
+    // có bài đăng trong 30 ngày gần nhất
+    const usersResult = await pool.request().query(`
+      SELECT COUNT(DISTINCT UserId) AS ActiveUsers
+      FROM Posts
+      WHERE CreatedAt >= DATEADD(DAY, -30, GETDATE())
+    `);
+    const activeUsers =
+      (usersResult.recordset[0] && usersResult.recordset[0].ActiveUsers) || 0;
+
+    res.json({ pending, approved, rejected, activeUsers });
+  } catch (err) {
+    console.error('Lỗi lấy summary:', err);
+    res.status(500).json({ error: 'Lỗi server' });
+  }
+}
+
+// =====================================================
+// API: DUYỆT BÀI
+// POST /api/admin/posts/:id/approve
+// - đổi Status = 'approved'
+// - ghi file JSON ra thư mục data/ để website hiển thị
+// =====================================================
+
 async function approvePost(req, res) {
   const postId = parseInt(req.params.id, 10);
   if (Number.isNaN(postId)) {
@@ -141,8 +192,9 @@ async function approvePost(req, res) {
     const post = result.recordset[0];
 
     if (post.Status === 'approved') {
-      // Nếu muốn tránh ghi trùng file JSON, có thể chỉ return luôn
-      return res.status(400).json({ error: 'Bài viết này đã được duyệt trước đó' });
+      return res
+        .status(400)
+        .json({ error: 'Bài viết này đã được duyệt trước đó' });
     }
 
     // Cập nhật trạng thái trong DB
@@ -154,10 +206,12 @@ async function approvePost(req, res) {
         WHERE PostId = @postId
       `);
 
-    // Ghi vào thư mục data/ để hiển thị ngoài website
+    // Ghi file JSON cho website
     const newItem = saveApprovedPostToData(post);
     if (!newItem) {
-      return res.status(500).json({ error: 'Duyệt bài nhưng không ghi được file dữ liệu' });
+      return res.status(500).json({
+        error: 'Duyệt bài nhưng không ghi được file dữ liệu',
+      });
     }
 
     res.json({ success: true, item: newItem });
@@ -166,6 +220,13 @@ async function approvePost(req, res) {
     res.status(500).json({ error: 'Lỗi server' });
   }
 }
+
+// =====================================================
+// API: TỪ CHỐI BÀI
+// POST /api/admin/posts/:id/reject
+// - KHÔNG xoá row nữa, chỉ đổi Status = 'rejected'
+// - Nếu là infographic, có thể xoá file ảnh (không ảnh hưởng dashboard)
+// =====================================================
 
 async function rejectPost(req, res) {
   const postId = parseInt(req.params.id, 10);
@@ -179,7 +240,7 @@ async function rejectPost(req, res) {
     const result = await pool.request()
       .input('postId', postId)
       .query(`
-        SELECT TOP 1 PostId, Type, LinkOrImage
+        SELECT TOP 1 PostId, Type, LinkOrImage, Status
         FROM Posts
         WHERE PostId = @postId
       `);
@@ -190,19 +251,34 @@ async function rejectPost(req, res) {
 
     const post = result.recordset[0];
 
-    // Nếu là infographic thì xoá ảnh luôn
+    if (post.Status === 'rejected') {
+      // đã bị từ chối trước đó
+      return res
+        .status(400)
+        .json({ error: 'Bài viết này đã bị từ chối trước đó' });
+    }
+
+    // Nếu là infographic, có thể xóa ảnh để tiết kiệm dung lượng
     if (post.Type === 'inforgraphic' && post.LinkOrImage) {
       const imgName = path.basename(post.LinkOrImage);
       const imgPath = path.join(INFO_IMG_DIR, imgName);
       if (fs.existsSync(imgPath)) {
-        fs.unlinkSync(imgPath);
+        try {
+          fs.unlinkSync(imgPath);
+        } catch (e) {
+          console.warn('Không xoá được ảnh infographic khi reject:', e);
+        }
       }
     }
 
-    // Xoá record trong bảng Posts
+    // Chỉ cập nhật trạng thái, KHÔNG xoá record
     await pool.request()
       .input('postId', postId)
-      .query(`DELETE FROM Posts WHERE PostId = @postId`);
+      .query(`
+        UPDATE Posts
+        SET Status = 'rejected'
+        WHERE PostId = @postId
+      `);
 
     res.json({ success: true });
   } catch (err) {
@@ -211,9 +287,14 @@ async function rejectPost(req, res) {
   }
 }
 
+// =====================================================
+
 module.exports = {
-  getPendingPosts,
+  // dùng cho dashboard mới
+  getPostsByStatus,
+  getSummary,
   approvePost,
   rejectPost,
+  // hàm cũ vẫn export nếu nơi khác dùng
+  saveApprovedPostToData,
 };
-

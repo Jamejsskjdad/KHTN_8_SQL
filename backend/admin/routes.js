@@ -2,7 +2,12 @@
 const express = require('express');
 const { requireAuth, requireAdmin } = require('../auth/middleware');
 const { getProfile } = require('./profile');
-const { getPendingPosts, approvePost, rejectPost  } = require('./dashboard');
+const {
+  getPostsByStatus,
+  getSummary,
+  approvePost,
+  rejectPost,
+} = require('./dashboard');
 
 const router = express.Router();
 
@@ -12,14 +17,20 @@ const router = express.Router();
  */
 router.get('/profile', requireAuth, requireAdmin, getProfile);
 
-// Dashboard: danh sách bài pending
-// GET /api/admin/posts/pending
-router.get('/posts/pending', requireAuth, requireAdmin, getPendingPosts);
+// Dashboard: lấy danh sách bài theo trạng thái
+// GET /api/admin/posts?status=pending|approved|rejected|all
+router.get('/posts', requireAuth, requireAdmin, getPostsByStatus);
+
+// Thống kê nhanh
+// GET /api/admin/posts/summary
+router.get('/posts/summary', requireAuth, requireAdmin, getSummary);
 
 // Duyệt bài
 // POST /api/admin/posts/:id/approve
 router.post('/posts/:id/approve', requireAuth, requireAdmin, approvePost);
 
-// Nút "Từ chối" trên dashboard sẽ gọi API này
-router.delete('/posts/:id/reject', requireAuth, requireAdmin, rejectPost);
+// Từ chối bài
+// POST /api/admin/posts/:id/reject
+router.post('/posts/:id/reject', requireAuth, requireAdmin, rejectPost);
+
 module.exports = router;
