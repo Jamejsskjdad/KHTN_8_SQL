@@ -14,8 +14,8 @@ body {
     opacity: 0.35;
     pointer-events: none;
     z-index: 0;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3), 
-                    -1px -1px 2px rgba(255, 255, 255, 0.5);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3),
+                 -1px -1px 2px rgba(255, 255, 255, 0.5);
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
     animation: float 20s infinite ease-in-out;
 }
@@ -47,67 +47,223 @@ body {
     z-index: 1;
 }
 
-/* Header */
-header {
-    background: white;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+/* =========================================================
+   HEADER MỚI – 2 TẦNG
+   ========================================================= */
+
+.edu-header {
     position: sticky;
     top: 0;
     z-index: 100;
 }
 
-.header-content {
+/* Tầng 1: banner nền bầu trời */
+.edu-hero {
+    background: linear-gradient(to bottom, #e6f3ff, #ffffff);
+}
+
+.edu-hero-inner {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 28px 24px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
+    justify-content: space-between;
+    gap: 24px;
 }
 
-.logo {
-    font-size: 24px;
-    font-weight: bold;
-    color: #667eea;
-}
-
-.subtitle {
-    font-size: 14px;
-    color: #666;
-    margin-top: 5px;
-}
-
-nav {
+.edu-hero-left {
     display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+}
+.edu-logo {
+    height: 90px;
+    width: 90px;
 }
 
-.nav-btn {
-    background: #667eea;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 25px;
-    cursor: pointer;
+
+.edu-hero-text {
+    line-height: 1.25;
+}
+
+.edu-hero-line-1 {
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: #333;
+}
+
+.edu-hero-line-2 {
+    text-transform: uppercase;
+    font-size: 30px;
+    font-weight: 700;
+    color: #d82329; /* đỏ giống header trường */
+}
+
+.edu-hero-line-3 {
     font-size: 14px;
-    transition: all 0.3s;
+    color: #555;
+}
+
+/* Nếu có huy chương / logo bên phải */
+.edu-hero-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Tầng 2: thanh menu xanh */
+.edu-main-nav {
+    background: #0073cf;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.edu-main-nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+/* Bên trái: user menu */
+.edu-nav-left {
+    display: flex;
+    align-items: center;
+}
+
+/* User menu chung */
+.user-menu {
+    position: relative;
+}
+
+/* Nút user:
+   - Khi chưa đăng nhập: pill "Đăng nhập"
+   - Khi đăng nhập: JS thêm class .logged-in để thành avatar tròn */
+.user-menu-button {
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 6px 14px;
+    
+    border-radius: 999px;
+    background: #ffffff;
+    color: #333;
+    font-size: 14px;
     font-weight: 500;
+    min-width: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.1s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.user-menu-button:hover {
+    background: #f0f4ff;
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.35);
+    transform: translateY(-1px);
+}
+
+/* Dropdown user */
+.user-menu-dropdown {
+    position: absolute;
+    left: 0;
+    top: 120%;
+    min-width: 180px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.25);
+    padding: 6px 0;
+    z-index: 999;
+}
+
+.user-menu-dropdown.hidden {
+    display: none;
+}
+
+.user-menu-item {
+    width: 100%;
+    padding: 8px 14px;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+}
+
+.user-menu-item:hover {
+    background: #f3f4ff;
+}
+
+/* Ở giữa: nhóm nút nav */
+.edu-nav-center {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+/* Nút menu – chỉ chữ trắng + gạch dưới khi active */
+.nav-btn {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 20px;
+    padding: 20px 0;
+    cursor: pointer;
+    font-weight: 500;
+    position: relative;
+    white-space: nowrap;
 }
 
 .nav-btn:hover {
-    background: #5568d3;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    opacity: 0.9;
 }
 
-.nav-btn.active {
-    background: #764ba2;
+/* Gạch dưới tab đang chọn */
+.nav-btn.active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 4px;
+    width: 100%;
+    height: 3px;
+    background: #ffffff;
+    border-radius: 999px;
 }
 
-/* Chatbot Button */
+/* Bên phải: nút tìm kiếm */
+.edu-nav-right {
+    display: flex;
+    align-items: center;
+}
+
+.edu-search-btn {
+    background: #0057a3;
+    border: none;
+    color: #ffffff;
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.edu-search-btn:hover {
+    background: #00457f;
+}
+
+/* =========================================================
+   CHATBOT BUBBLE
+   ========================================================= */
+
 .chatbot-bubble {
     position: fixed;
     top: 20px;
@@ -135,7 +291,10 @@ nav {
     font-size: 30px;
 }
 
-/* Main Content */
+/* =========================================================
+   MAIN CONTENT
+   ========================================================= */
+
 main {
     min-height: calc(100% - 200px);
     padding: 40px 0;
@@ -172,6 +331,7 @@ main {
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     transition: all 0.3s;
     cursor: pointer;
+    position: relative;
 }
 
 .card:hover {
@@ -234,11 +394,10 @@ main {
     transform: scale(1.1);
 }
 
-.card {
-    position: relative;
-}
+/* =========================================================
+   DETAIL PAGE
+   ========================================================= */
 
-/* Detail Page */
 .detail-page {
     background: white;
     border-radius: 15px;
@@ -290,7 +449,10 @@ main {
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-/* Admin Form */
+/* =========================================================
+   ADMIN FORM
+   ========================================================= */
+
 .admin-form {
     background: white;
     border-radius: 15px;
@@ -356,7 +518,10 @@ main {
     cursor: not-allowed;
 }
 
-/* Footer */
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
 footer {
     background: rgba(255,255,255,0.1);
     color: white;
@@ -365,7 +530,10 @@ footer {
     margin-top: 40px;
 }
 
-/* Chatbot Modal */
+/* =========================================================
+   CHATBOT MODAL
+   ========================================================= */
+
 .chatbot-modal {
     display: none;
     position: fixed;
@@ -422,6 +590,10 @@ footer {
     border-radius: 15px;
 }
 
+/* =========================================================
+   EMPTY / LOADING STATE
+   ========================================================= */
+
 .empty-state {
     text-align: center;
     padding: 60px 20px;
@@ -443,7 +615,6 @@ footer {
     opacity: 0.8;
 }
 
-/* Loading State */
 .loading {
     text-align: center;
     padding: 40px;
@@ -451,7 +622,10 @@ footer {
     font-size: 18px;
 }
 
-/* Responsive */
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
 @media (max-width: 1024px) {
     .cards-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -459,18 +633,24 @@ footer {
 }
 
 @media (max-width: 768px) {
-    .header-content {
+    .edu-hero-inner {
         flex-direction: column;
-        text-align: center;
+        align-items: flex-start;
     }
 
-    nav {
+    .edu-main-nav-inner {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .edu-nav-center {
+        flex-wrap: wrap;
         justify-content: center;
     }
 
-    .nav-btn {
-        font-size: 12px;
-        padding: 8px 15px;
+    .edu-nav-right {
+        align-self: flex-end;
     }
 
     .page-title {
@@ -496,87 +676,61 @@ footer {
         height: 400px;
     }
 }
-/* ===== USER MENU (AVATAR + DROPDOWN) ===== */
-
-/* Nhóm bên trái: user menu + logo */
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-/* User menu nằm ngay sát mép trái header-left */
-.user-menu {
-    position: relative;
-}
-
-/* Nút mặc định: Đăng nhập (hình pill) */
+/* Nút user – luôn là pill, bên trong chứa avatar + tên */
 .user-menu-button {
     border: none;
     outline: none;
     cursor: pointer;
-    padding: 6px 14px;
+    padding: 8px 16px;
     border-radius: 999px;
-    background: #f0f2ff;
+    background: #ffffff;
     color: #333;
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 500;
+    min-width: auto;
     display: flex;
     align-items: center;
-    justify-content: center;
-    min-width: 90px;
+    gap: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
     transition: background 0.2s, transform 0.1s, box-shadow 0.1s;
-}
-
-.user-menu-button:hover {
-    background: #e0e4ff;
-    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+  }
+  
+  .user-menu-button:hover {
+    background: #f0f4ff;
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.35);
     transform: translateY(-1px);
-}
-
-/* Khi đã đăng nhập: dùng class logged-in để đổi thành avatar tròn */
-.user-menu-button.logged-in {
-    width: 36px;
-    height: 36px;
-    padding: 0;
+  }
+  
+  /* Avatar tròn chứa chữ cái đầu */
+  .user-avatar-circle {
+    width: 42px;
+    height: 42px;
+    font-size: 16px;
     border-radius: 50%;
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: #fff;
-    font-size: 15px;
     font-weight: 600;
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
-    min-width: 36px;
-}
-
-/* Dropdown menu */
-.user-menu-dropdown {
-    position: absolute;
-    left: 0;            /* bám vào trái, đúng ý bạn */
-    top: 120%;
-    min-width: 180px;
-    background: #ffffff;
-    border-radius: 14px;
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.2);
-    padding: 6px 0;
-    z-index: 1000;
-}
-
-/* class ẩn/hiện dùng trong JS */
-.hidden {
-    display: none;
-}
-
-.user-menu-item {
-    width: 100%;
-    padding: 8px 14px;
-    border: none;
-    background: transparent;
-    text-align: left;
     font-size: 14px;
-    color: #333;
-    cursor: pointer;
-}
-
-.user-menu-item:hover {
-    background: #f3f4ff;
-}
+    display: none;           /* guest: ẩn avatar */
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  /* Khi đã đăng nhập mới hiển thị avatar */
+  .user-menu-button.logged-in .user-avatar-circle {
+    display: flex;
+  }
+  
+  /* Label bên phải avatar */
+  .user-menu-label {
+    font-size: 14px;
+    color: #222;
+  }
+  
+  /* Logged-in chỉ khác màu chữ 1 chút (nếu muốn) */
+  .user-menu-button.logged-in {
+    background: #ffffff;
+    color: #222;
+  }
+  

@@ -123,14 +123,10 @@ function showPage(pageId) {
         activePage.classList.add('active');
     }
     
-    const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(btn => 
-        btn.textContent.toLowerCase().includes(pageId === 'home' ? 'trang chủ' : 
-            pageId === 'admin' ? 'quản trị' : typeLabels[pageId]?.toLowerCase() || '')
-    );
+    const activeBtn = document.querySelector(`.nav-btn[data-page="${pageId}"]`);
     if (activeBtn) {
-        activeBtn.classList.add('active');
-    }
-    
+      activeBtn.classList.add('active');
+    }   
     if (pageId !== 'detail') {
         previousPage = currentPage;
     }
@@ -487,12 +483,19 @@ function createFloatingIcons() {
 function setupUserMenu() {
     const btn = document.getElementById('userMenuButton');
     const label = document.getElementById('userMenuLabel');
+    const avatar = document.getElementById('userMenuAvatar');
     const dropdown = document.getElementById('userMenuDropdown');
     if (!btn || !label || !dropdown) return;
   
-    // Nếu chưa đăng nhập hoặc là guest → nút Đăng nhập, không có dropdown
+    // Guest hoặc chưa đăng nhập
     if (!authRole || authRole === 'guest') {
       btn.classList.remove('logged-in');
+  
+      if (avatar) {
+        avatar.textContent = '';         // xoá chữ trong avatar
+        avatar.style.display = 'none';   // ẩn hẳn avatar
+      }
+  
       label.textContent = 'Đăng nhập';
       dropdown.classList.add('hidden');
   
@@ -505,9 +508,18 @@ function setupUserMenu() {
     // Đã đăng nhập: user hoặc admin
     btn.classList.add('logged-in');
   
-    // Hiển thị chữ cái đầu của username làm avatar
-    const initial = (authUsername && authUsername[0]) ? authUsername[0].toUpperCase() : (authRole === 'admin' ? 'A' : 'U');
-    label.textContent = initial;
+    const initial = (authUsername && authUsername[0])
+      ? authUsername[0].toUpperCase()
+      : (authRole === 'admin' ? 'A' : 'U');
+  
+    if (avatar) {
+      avatar.textContent = initial;
+      avatar.style.display = 'flex';
+    }
+  
+    // Hiển thị username đầy đủ bên cạnh avatar
+    label.textContent = authUsername || (authRole === 'admin' ? 'Admin' : 'User');
+  
   
     // Build menu items
     const items = [];

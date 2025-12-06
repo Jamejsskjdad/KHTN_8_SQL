@@ -10,43 +10,66 @@
  </head>
  <body><!-- Floating Background Icons -->
   <div id="floatingIcons"></div><!-- Header -->
-  <header>
-  <div class="header-content">
-    <!-- BÊN TRÁI: user menu + logo -->
-    <div class="header-left">
-      <!-- User menu -->
-      <div class="user-menu">
-        <button id="userMenuButton" class="user-menu-button">
-          <span id="userMenuLabel">Đăng nhập</span>
-        </button>
-        <div id="userMenuDropdown" class="user-menu-dropdown hidden">
-          <!-- JS sẽ fill nội dung -->
+  <header class="edu-header">
+  <!-- Tầng 1: banner trên -->
+  <div class="edu-hero">
+    <div class="edu-hero-inner">
+      <div class="edu-hero-left">
+        <!-- Logo trường / logo website -->
+        <!-- Đổi src thành logo thật của bạn -->
+        <img src="logo/logotruong.jpg" alt="Logo" class="edu-logo">
+
+        <div class="edu-hero-text">
+          <div class="edu-hero-line-1">TRƯỜNG THCS ĐỘC LẬP</div>
+          <div class="edu-hero-line-2">WEBSITE HỖ TRỢ HỌC KHTN 8</div>
+          <div class="edu-hero-line-3">Khoa học không khó – chỉ là cách chúng ta tiếp cận!</div>
         </div>
       </div>
 
-      <!-- Logo + subtitle -->
-      <div>
-        <div class="logo" id="siteTitle">
-          WEBSITE HỖ TRỢ HỌC KHTN 8
-        </div>
-        <div class="subtitle" id="siteSubtitle">
-          Khoa học không khó – chỉ là cách chúng ta tiếp cận!
-        </div>
+      <!-- Bạn có thể chèn huy chương / khẩu hiệu bên phải nếu muốn -->
+      <div class="edu-hero-right">
+        <!-- Ví dụ: -->
+        <!-- <img src="images/huychuong.png" alt="Danh hiệu" class="edu-badge"> -->
       </div>
     </div>
+  </div>
 
-    <!-- BÊN PHẢI: thanh menu chính -->
-    <nav>
-      <button class="nav-btn active" onclick="showPage('home')">🏠 Trang chủ</button>
-      <button class="nav-btn" onclick="showPage('videos')">🎥 Video</button>
-      <button class="nav-btn" onclick="showPage('comics')">📚 Truyện tranh</button>
-      <button class="nav-btn" onclick="showPage('flashcards')">🎴 Flashcard</button>
-      <button class="nav-btn" onclick="showPage('games')">🎮 Game</button>
-      <button class="nav-btn" onclick="showPage('experiments')">🔬 Thí nghiệm</button>
-      <button class="nav-btn" onclick="showPage('quizzes')">📝 Trắc nghiệm</button>
-      <button class="nav-btn" onclick="showPage('inforgraphic')">Infographic</button>
-      <button class="nav-btn" onclick="showPage('admin')">⚙️ Quản trị</button>
-    </nav>
+  <!-- Tầng 2: thanh menu xanh -->
+  <div class="edu-main-nav">
+    <div class="edu-main-nav-inner">
+      <!-- Bên trái: menu user (giữ nguyên để JS hiện avatar + dropdown) -->
+      <div class="edu-nav-left">
+        <div class="user-menu">
+          <button id="userMenuButton" class="user-menu-button">
+            <!-- avatar tròn -->
+            <span id="userMenuAvatar" class="user-avatar-circle">A</span>
+            <!-- chữ bên cạnh: Đăng nhập / username -->
+            <span id="userMenuLabel" class="user-menu-label">Đăng nhập</span>
+          </button>
+          <div id="userMenuDropdown" class="user-menu-dropdown hidden"></div>
+        </div>
+      </div>
+
+      <!-- Ở giữa: các nút điều hướng (giữ class nav-btn + onclick để JS showPage vẫn hoạt động) -->
+      <nav class="edu-nav-center">
+        <button class="nav-btn active" data-page="home" onclick="showPage('home')">Trang chủ</button>
+        <button class="nav-btn" data-page="videos" onclick="showPage('videos')">Video</button>
+        <button class="nav-btn" data-page="comics" onclick="showPage('comics')">Truyện tranh</button>
+        <button class="nav-btn" data-page="flashcards" onclick="showPage('flashcards')">Flashcard</button>
+        <button class="nav-btn" data-page="games" onclick="showPage('games')">Game</button>
+        <button class="nav-btn" data-page="experiments" onclick="showPage('experiments')">Thí nghiệm</button>
+        <button class="nav-btn" data-page="quizzes" onclick="showPage('quizzes')">Trắc nghiệm</button>
+        <button class="nav-btn" data-page="inforgraphic" onclick="showPage('inforgraphic')">Infographic</button>
+        <button class="nav-btn" data-page="admin" onclick="showPage('admin')">Quản trị</button>
+      </nav>
+
+      <!-- Bên phải: nút tìm kiếm (tạm thời là icon, sau này bạn gắn chức năng cũng được) -->
+      <div class="edu-nav-right">
+        <button class="edu-search-btn" type="button" title="Tìm kiếm (đang xây dựng)">
+          🔍
+        </button>
+      </div>
+    </div>
   </div>
 </header>
 <!-- Chatbot Bubble -->
