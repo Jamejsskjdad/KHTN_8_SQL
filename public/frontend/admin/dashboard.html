@@ -30,7 +30,7 @@
               id="navPending"
               data-status="pending">
         <span class="db-nav-icon">📝</span>
-        <span>Danh sách bài chờ duyệt</span>
+        <span>Bài chờ duyệt</span>
       </button>
     
       <!-- trạng thái: đã duyệt -->
@@ -73,29 +73,6 @@
         <p class="db-header-subtitle">
           Quản lý và phê duyệt nội dung do người dùng gửi lên.
         </p>
-      </div>
-
-      <div class="db-header-right">
-        <form class="db-search-box" onsubmit="return false;">
-          <span class="db-search-icon">🔍</span>
-          <input id="searchInput" type="text"
-                 placeholder="Tìm theo tiêu đề, ID, người gửi..."
-                 oninput="handleSearch(this.value)">
-        </form>
-
-        <!-- Nếu không cần chuông thông báo, có thể bỏ button này -->
-        <button class="db-notif-btn" type="button" title="Thông báo">
-          🔔
-          <span class="db-notif-badge">3</span>
-        </button>
-
-        <div class="db-profile-pill">
-          <div class="db-profile-avatar">AD</div>
-          <div class="db-profile-text">
-            <div class="db-profile-name">Admin</div>
-            <div class="db-profile-role">Super moderator</div>
-          </div>
-        </div>
       </div>
     </header>
 
@@ -145,7 +122,6 @@
         <div class="db-table-header">
           <div class="db-table-header-left">
             <h2 class="db-section-title">Danh sách bài chờ duyệt</h2>
-            <span id="badgeTotal" class="db-badge">0 bài</span>
           </div>
 
           <div class="db-table-filters">

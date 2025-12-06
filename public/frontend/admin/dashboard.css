@@ -248,6 +248,113 @@ body {
   font-weight: 500;
   cursor: default;
 }
+/* Khu vực nội dung tổng thể của Dashboard */
+.dashboard-content,
+.main-content,
+.db-container {
+    max-width: 1800px !important;   /* tăng từ 1100–1300px lên lớn hơn */
+    margin: 0 auto;                 /* căn giữa */
+    padding: 30px 40px !important;  /* tăng không gian cho đẹp */
+    transform: scale(1.05);         /* phóng lớn nhẹ toàn trang */
+    transform-origin: top center;
+}
+.db-metric-card {
+  padding: 26px 32px !important;
+  font-size: 1.1rem;
+}
+
+.db-metric-value {
+  font-size: 1.6rem !important;
+}
+.db-table {
+  font-size: 1.05rem;
+}
+
+.db-table th,
+.db-table td {
+  padding: 14px 20px !important;
+}
+/* Tăng kích thước toàn bộ sidebar */
+.db-sidebar {
+  font-size: 17px;
+}
+
+/* Tăng chữ trong từng menu */
+.db-nav-item {
+  font-size: 17px;
+  padding: 14px 18px;
+}
+
+/* Tăng icon trong sidebar */
+.db-nav-item img,
+.db-nav-item i {
+  width: 20px;
+  height: 20px;
+}
+/* Thanh header trên cùng */
+.db-topbar {
+  font-size: 17px;
+}
+
+/* Ô tìm kiếm */
+.db-search-input {
+  font-size: 16px;
+  padding: 10px 16px;
+}
+
+/* Tên admin + role */
+.db-user-info {
+  font-size: 17px;
+}
+.db-metric-card {
+  font-size: 18px;
+}
+
+.db-metric-number {
+  font-size: 28px;
+  font-weight: 600;
+}
+/* Header bảng */
+.db-table thead th {
+  font-size: 17px;
+  padding: 14px 10px;
+}
+
+/* Dòng trong bảng */
+.db-table tbody td {
+  font-size: 16px;
+  padding: 14px 10px;
+}
+
+/* Cột tiêu đề bài */
+.db-title-cell {
+  font-size: 16px !important;
+}
+#filterType,
+#filterStatus {
+    font-size: 16px;
+    padding: 8px 14px;
+}
+.db-btn {
+  font-size: 15px;
+  padding: 8px 14px;
+}
+
+.db-btn--primary,
+.db-btn--danger,
+.db-btn--ghost {
+  font-size: 15px;
+  padding: 8px 14px;
+}
+.db-modal-content {
+  font-size: 17px;
+}
+
+.db-modal-content h3 {
+  font-size: 22px;
+  font-weight: 600;
+}
+
 .db-text-muted {
   color: #94a3b8;        /* xám nhạt */
   font-size: 12px;
