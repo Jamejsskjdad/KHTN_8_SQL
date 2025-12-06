@@ -78,7 +78,7 @@ function renderAllContent() {
                     grid.innerHTML = items.map(item => `
                     <div class="card">
                         ${canDelete ? `
-                            <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️️</button>
+                            <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️️🗑️</button>
                         ` : ''}
                         <div class="card-title">${typeIcons[type] || ''} ${item.title}</div>
                         <button class="card-btn" onclick="openLink(event, '${item.link}')">Xem ngay</button>
@@ -90,7 +90,7 @@ function renderAllContent() {
                 grid.innerHTML = items.map(item => `
                 <div class="card">
                     ${canDelete ? `
-                        <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️️</button>
+                        <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️️🗑️</button>
                     ` : ''}
                     <div class="card-title">${typeIcons[type] || ''} ${item.title}</div>
                     <button class="card-btn" onclick="openLink(event, '${item.link}')">Xem ngay</button>
