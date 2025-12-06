@@ -1,3 +1,6 @@
+// Ở đầu page.js
+const authRole  = localStorage.getItem('authRole')  || 'guest';
+const authToken = localStorage.getItem('authToken') || null;
 
 const defaultConfig = {
     site_title: "Website học KHTN lớp 8",
@@ -71,23 +74,27 @@ function renderAllContent() {
         } else {
             // Nếu là inforgraphic thì hiển thị ảnh
             if (type === 'inforgraphic') {
-                grid.innerHTML = items.map(item => `
+                const canDelete = authRole === 'admin';
+                    grid.innerHTML = items.map(item => `
                     <div class="card">
-                        <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️🗑️</button>
-                        <div class="card-title">${item.title}</div>
-                        <img src="${item.link}" alt="${item.title}"
-                             style="width:100%;border-radius:8px;margin:10px 0;">
-                        <button class="card-btn" onclick="openLink(event, '${item.link}')">Xem ảnh</button>
-                    </div>
-                `).join('');
-            } else {
-                // Các loại khác giữ nguyên cách hiển thị
-                grid.innerHTML = items.map(item => `
-                    <div class="card">
-                        <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️🗑️</button>
+                        ${canDelete ? `
+                            <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️️</button>
+                        ` : ''}
                         <div class="card-title">${typeIcons[type] || ''} ${item.title}</div>
                         <button class="card-btn" onclick="openLink(event, '${item.link}')">Xem ngay</button>
                     </div>
+                    `).join('');
+            } else {
+                // Các loại khác giữ nguyên cách hiển thị
+                const canDelete = authRole === 'admin';
+                grid.innerHTML = items.map(item => `
+                <div class="card">
+                    ${canDelete ? `
+                        <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️️</button>
+                    ` : ''}
+                    <div class="card-title">${typeIcons[type] || ''} ${item.title}</div>
+                    <button class="card-btn" onclick="openLink(event, '${item.link}')">Xem ngay</button>
+                </div>
                 `).join('');
             }
         }
@@ -95,6 +102,14 @@ function renderAllContent() {
 }
 
 function showPage(pageId) {
+    // CHẶN GUEST VÀO ADMIN
+    if (pageId === 'admin') {
+        if (!authRole || authRole === 'guest') {
+            alert('Bạn cần đăng nhập tài khoản học sinh hoặc admin để truy cập trang quản trị.');
+            window.location.href = '/login.html';
+            return;
+        }
+    }
     document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
     });
@@ -234,65 +249,102 @@ function updateAdminFields() {
 
 async function handleSubmit(event) {
     event.preventDefault();
-
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Đang thêm...';
-
-    const type = document.getElementById('contentType').value;
-    const title = document.getElementById('contentTitle').value;
-    const linkInput = document.getElementById('contentLink');
-    const imageInput = document.getElementById('contentImage');
-
-    try {
+  
+    const type      = document.getElementById('contentType').value;
+    const title     = document.getElementById('contentTitle').value.trim();
+    const link      = document.getElementById('contentLink').value.trim();
+    const imageFile = document.getElementById('contentImage').files[0];
+  
+    if (!type || !title) {
+      alert('Vui lòng chọn loại nội dung và nhập tiêu đề.');
+      return;
+    }
+  
+    // 0. Guest: không cho gửi
+    if (!authRole || authRole === 'guest') {
+      alert('Bạn cần đăng nhập tài khoản học sinh hoặc admin để đăng bài.');
+      window.location.href = '/login.html';
+      return;
+    }
+  
+    // 1. STUDENT: GỬI REQUEST VỀ BẢNG Posts (PENDING)
+    if (authRole === 'user') {
+      try {
+        // với infographic hiện tại ta chỉ gửi tiêu đề + type, linkOrImage có thể để null
+        const res = await fetch('/api/student/posts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authToken ? 'Bearer ' + authToken : ''
+          },
+          body: JSON.stringify({
+            title,
+            type,
+            // nếu bạn có dùng link cho các loại khác thì giữ như này:
+            linkOrImage: link || null
+          })
+        });
+  
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Gửi bài thất bại');
+        }
+  
+        // ✅ THÔNG BÁO SAU KHI INSERT THÀNH CÔNG
+        alert('Bài đăng của bạn đã được gửi cho quản trị viên để duyệt.');
+        event.target.reset();
+      } catch (err) {
+        console.error(err);
+        alert(err.message || 'Lỗi gửi bài, vui lòng thử lại.');
+      }
+      return;
+    }
+  
+    // 2. ADMIN: ĐĂNG TRỰC TIẾP VÀO /api/content (THƯ MỤC data/)
+    if (authRole === 'admin') {
+      try {
         const formData = new FormData();
         formData.append('type', type);
         formData.append('title', title);
-
+  
         if (type === 'inforgraphic') {
-            if (!imageInput.files || !imageInput.files[0]) {
-                alert('Vui lòng chọn ảnh Inforgraphic (PNG/JPG)');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Thêm mới';
-                return;
-            }
-            formData.append('image', imageInput.files[0]);
+          if (!imageFile) {
+            alert('Vui lòng chọn ảnh infographic.');
+            return;
+          }
+          formData.append('image', imageFile);
         } else {
-            formData.append('link', linkInput.value);
+          if (!link) {
+            alert('Vui lòng nhập link nội dung.');
+            return;
+          }
+          formData.append('link', link);
         }
-
+  
         const res = await fetch('/api/content', {
-            method: 'POST',
-            body: formData
+          method: 'POST',
+          headers: {
+            'Authorization': authToken ? 'Bearer ' + authToken : ''
+          },
+          body: formData
         });
-
+  
+        const data = await res.json();
         if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.error || 'Lỗi khi thêm nội dung');
+          throw new Error(data.error || 'Thêm nội dung thất bại');
         }
-
-        const newItem = await res.json();
-
-        allContent.push(newItem);
-        renderAllContent();
-
-        document.getElementById('adminForm').reset();
-        updateAdminFields(); // reset lại hiển thị các field
-
-        const successDiv = document.createElement('div');
-        successDiv.style.cssText =
-            'background: #4CAF50; color: white; padding: 15px; border-radius: 8px; margin-top: 15px; text-align: center;';
-        successDiv.textContent = 'Đã thêm nội dung thành công!';
-        document.querySelector('.admin-form').appendChild(successDiv);
-        setTimeout(() => successDiv.remove(), 3000);
-    } catch (err) {
+  
+        alert('Thêm nội dung thành công.');
+        event.target.reset();
+        loadData();
+      } catch (err) {
         console.error(err);
-        alert(err.message || 'Lỗi khi thêm nội dung');
+        alert(err.message || 'Lỗi thêm nội dung.');
+      }
     }
-
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Thêm mới';
-}
+  }
+  
+  
 
 function closeChatbot() {
     document.getElementById('chatbotModal').classList.remove('active');

@@ -4,15 +4,20 @@ const path = require('path');
 const multer = require('multer');
 
 const authRoutes = require('./backend/auth/routes');
-// sau này thêm:
 const studentRoutes = require('./backend/student/routes');
 const adminRoutes = require('./backend/admin/routes');
+
+// 👉 THÊM DÒNG NÀY ĐỂ DÙNG requireAuth, requireAdmin
+const { requireAuth, requireAdmin } = require('./backend/auth/middleware');
 
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());  // để đọc body JSON
-
+app.use(express.json());
+// 👉 THÊM ROUTE NÀY TRƯỚC static
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
 // static files
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -20,6 +25,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/auth', authRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/admin', adminRoutes);
+
 // Thư mục dữ liệu chung
 const DATA_DIR = path.join(__dirname, 'data');
 
@@ -35,7 +41,7 @@ const TYPES = [
 ];
 
 // Thư mục riêng cho inforgraphic
-const INFO_IMG_DIR = path.join(DATA_DIR, 'inforgraphic_pic');   // 👈 tên thư mục ngoài thực tế
+const INFO_IMG_DIR = path.join(DATA_DIR, 'inforgraphic_pic');
 const INFO_JSON_DIR = path.join(DATA_DIR, 'inforgraphic_json');
 
 function ensureFolder(folderPath) {
@@ -54,7 +60,7 @@ ensureFolder(INFO_IMG_DIR);
 ensureFolder(INFO_JSON_DIR);
 
 // Serve ảnh inforgraphic
-app.use('/inforgraphic_pic', express.static(INFO_IMG_DIR));  // 👈 đường dẫn public
+app.use('/inforgraphic_pic', express.static(INFO_IMG_DIR));
 
 /**
  * Cấu hình multer để upload ảnh PNG/JPG cho inforgraphic
@@ -65,7 +71,7 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname).toLowerCase();
-    const id = Date.now().toString(); // dùng timestamp làm tên file ảnh
+    const id = Date.now().toString();
     cb(null, id + ext);
   }
 });
@@ -102,6 +108,7 @@ function readType(type) {
 
 /**
  * GET /api/content – trả về toàn bộ nội dung
+ * 👉 Cho phép mọi người (guest, student, admin) gọi
  */
 app.get('/api/content', (req, res) => {
   let allContent = [];
@@ -113,63 +120,67 @@ app.get('/api/content', (req, res) => {
 
 /**
  * POST /api/content – thêm item mới
- * - Nếu type = inforgraphic: nhận file ảnh, tạo JSON trong inforgraphic_json
- * - Các type khác: giữ cách cũ (dùng link)
+ * 👉 CHỈ ADMIN được phép (requireAuth + requireAdmin)
  */
-app.post('/api/content', upload.single('image'), (req, res) => {
-  const { type, title, link } = req.body;
+app.post(
+  '/api/content',
+  requireAuth,
+  requireAdmin,
+  upload.single('image'),
+  (req, res) => {
+    const { type, title, link } = req.body;
 
-  if (!TYPES.includes(type)) {
-    return res.status(400).json({ error: 'Invalid type' });
-  }
-
-  // Trường hợp inforgraphic: phải có file ảnh
-  if (type === 'inforgraphic') {
-    if (!req.file) {
-      return res.status(400).json({ error: 'Image is required' });
+    if (!TYPES.includes(type)) {
+      return res.status(400).json({ error: 'Invalid type' });
     }
 
-    const id = Date.now().toString();
-    const imagePath = `/inforgraphic_pic/${req.file.filename}`; // 👈 trỏ đến thư mục ảnh
+    // Inforgraphic: phải có file ảnh
+    if (type === 'inforgraphic') {
+      if (!req.file) {
+        return res.status(400).json({ error: 'Image is required' });
+      }
 
+      const id = Date.now().toString();
+      const imagePath = `/inforgraphic_pic/${req.file.filename}`;
+
+      const newItem = {
+        __backendId: id,
+        id,
+        type: 'inforgraphic',
+        title,
+        link: imagePath,
+        createdAt: new Date().toISOString()
+      };
+
+      const jsonPath = path.join(INFO_JSON_DIR, `${id}.json`);
+      fs.writeFileSync(jsonPath, JSON.stringify(newItem, null, 2), 'utf8');
+
+      return res.json(newItem);
+    }
+
+    // Các loại khác: giữ link
+    const id = Date.now().toString();
     const newItem = {
       __backendId: id,
       id,
-      type: 'inforgraphic',
+      type,
       title,
-      link: imagePath, // 👈 JSON chỉ đường tới ảnh
+      link,
       createdAt: new Date().toISOString()
     };
 
-    const jsonPath = path.join(INFO_JSON_DIR, `${id}.json`);
-    fs.writeFileSync(jsonPath, JSON.stringify(newItem, null, 2), 'utf8');
+    const filePath = path.join(DATA_DIR, type, `${id}.json`);
+    fs.writeFileSync(filePath, JSON.stringify(newItem, null, 2), 'utf8');
 
-    return res.json(newItem);
+    res.json(newItem);
   }
-
-  // Các loại khác: giữ logic cũ (dùng link)
-  const id = Date.now().toString();
-  const newItem = {
-    __backendId: id,
-    id,
-    type,
-    title, 
-    link,
-    createdAt: new Date().toISOString()
-  };
-
-  const filePath = path.join(DATA_DIR, type, `${id}.json`);
-  fs.writeFileSync(filePath, JSON.stringify(newItem, null, 2), 'utf8');
-
-  res.json(newItem);
-});
+);
 
 /**
  * DELETE /api/content/:id – xoá item
- * - Nếu là inforgraphic: xoá cả JSON và file ảnh
- * - Nếu là loại khác: xoá JSON như cũ
+ * 👉 CHỈ ADMIN được phép
  */
-app.delete('/api/content/:id', (req, res) => {
+app.delete('/api/content/:id', requireAuth, requireAdmin, (req, res) => {
   const id = req.params.id;
   let deleted = false;
 

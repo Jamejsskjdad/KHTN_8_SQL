@@ -1,17 +1,20 @@
 // backend/auth/routes.js
 const express = require('express');
 const { requireAuth } = require('./middleware');
-const { register, login, me } = require('../login'); // ../login vì login.js nằm ở backend/
+const { register, registerAdmin, login, me } = require('../login');
 
 const router = express.Router();
 
-// Đăng ký (student) – mặc định role = 'user'
+// Đăng ký student (mặc định role = 'user')
 router.post('/register', register);
 
-// Đăng nhập (cho cả admin và student)
+// Đăng ký admin (tạm thời, sau dùng xong nên xoá hoặc bảo vệ bằng secret)
+router.post('/register-admin', registerAdmin);
+
+// Đăng nhập
 router.post('/login', login);
 
-// Lấy thông tin user hiện tại qua token
+// Lấy thông tin user hiện tại
 router.get('/me', requireAuth, me);
 
 module.exports = router;

@@ -63,7 +63,60 @@ async function register(req, res) {
     res.status(500).json({ error: 'Lỗi server' });
   }
 }
-
+// 👉 THÊM HÀM MỚI: registerAdmin (tạo user có role = 'admin')
+async function registerAdmin(req, res) {
+    const { username, email, password } = req.body || {};
+  
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: 'Thiếu username, email hoặc password' });
+    }
+  
+    try {
+      const pool = await getPool();
+  
+      const check = await pool.request()
+        .input('username', username)
+        .input('email', email)
+        .query(`
+          SELECT 1
+          FROM Users
+          WHERE Username = @username OR Email = @email
+        `);
+  
+      if (check.recordset.length > 0) {
+        return res.status(400).json({ error: 'Username hoặc email đã tồn tại' });
+      }
+  
+      const hash = await bcrypt.hash(password, 10);
+  
+      const result = await pool.request()
+        .input('username', username)
+        .input('email', email)
+        .input('passwordHash', hash)
+        .query(`
+          INSERT INTO Users (Username, Email, PasswordHash, Role)
+          OUTPUT INSERTED.UserId, INSERTED.Role
+          VALUES (@username, @email, @passwordHash, 'admin')
+        `);
+  
+      const user = result.recordset[0];
+  
+      const token = jwt.sign(
+        { userId: user.UserId, username, role: user.Role },
+        SECRET,
+        { expiresIn: '7d' }
+      );
+  
+      res.json({
+        token,
+        role: user.Role,      // 'admin'
+        username,
+      });
+    } catch (err) {
+      console.error('Lỗi registerAdmin:', err);
+      res.status(500).json({ error: 'Lỗi server' });
+    }
+  }
 /**
  * Đăng nhập (dùng cho cả admin & student)
  * POST /api/auth/login
@@ -143,6 +196,7 @@ async function me(req, res) {
 
 module.exports = {
   register,
+  registerAdmin,
   login,
   me,
 };
