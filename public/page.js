@@ -1,7 +1,7 @@
 // Ở đầu page.js
 const authRole  = localStorage.getItem('authRole')  || 'guest';
 const authToken = localStorage.getItem('authToken') || null;
-
+const authUsername = localStorage.getItem('authUsername') || '';
 const defaultConfig = {
     site_title: "Website học KHTN lớp 8",
     site_subtitle: "Học tập thông minh, phát triển toàn diện",
@@ -484,7 +484,101 @@ function createFloatingIcons() {
         container.appendChild(iconDiv);
     }
 }
-
+function setupUserMenu() {
+    const btn = document.getElementById('userMenuButton');
+    const label = document.getElementById('userMenuLabel');
+    const dropdown = document.getElementById('userMenuDropdown');
+    if (!btn || !label || !dropdown) return;
+  
+    // Nếu chưa đăng nhập hoặc là guest → nút Đăng nhập, không có dropdown
+    if (!authRole || authRole === 'guest') {
+      btn.classList.remove('logged-in');
+      label.textContent = 'Đăng nhập';
+      dropdown.classList.add('hidden');
+  
+      btn.onclick = () => {
+        window.location.href = '/login.html';
+      };
+      return;
+    }
+  
+    // Đã đăng nhập: user hoặc admin
+    btn.classList.add('logged-in');
+  
+    // Hiển thị chữ cái đầu của username làm avatar
+    const initial = (authUsername && authUsername[0]) ? authUsername[0].toUpperCase() : (authRole === 'admin' ? 'A' : 'U');
+    label.textContent = initial;
+  
+    // Build menu items
+    const items = [];
+  
+    // Profile
+    items.push({
+      id: 'profile',
+      label: 'Trang cá nhân',
+    });
+  
+    // Dashboard chỉ cho admin
+    if (authRole === 'admin') {
+      items.push({
+        id: 'dashboard',
+        label: 'Dashboard quản trị',
+      });
+    }
+  
+    // Logout
+    items.push({
+      id: 'logout',
+      label: 'Đăng xuất',
+    });
+  
+    dropdown.innerHTML = items
+      .map(item => `<button class="user-menu-item" data-id="${item.id}">${item.label}</button>`)
+      .join('');
+  
+    // Toggle dropdown khi bấm avatar
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      dropdown.classList.toggle('hidden');
+    };
+  
+    // Click item trong dropdown
+    dropdown.addEventListener('click', (e) => {
+      const itemEl = e.target.closest('.user-menu-item');
+      if (!itemEl) return;
+      const id = itemEl.dataset.id;
+  
+      if (id === 'profile') {
+        if (authRole === 'admin') {
+          window.location.href = '/frontend/admin/profile.html';
+        } else {
+          window.location.href = '/frontend/student/profile.html';
+        }
+      }
+  
+      if (id === 'dashboard' && authRole === 'admin') {
+        window.location.href = '/frontend/admin/dashboard.html';
+      }
+  
+      if (id === 'logout') {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('authRole');
+        localStorage.removeItem('authUsername');
+        window.location.href = '/login.html';
+      }
+    });
+  
+    // Click ra ngoài để đóng dropdown
+    document.addEventListener('click', () => {
+      dropdown.classList.add('hidden');
+    });
+  }
+  
+  // Gọi sau khi DOM sẵn sàng
+  document.addEventListener('DOMContentLoaded', () => {
+    setupUserMenu();
+  });
+  
 // Khởi chạy mọi thứ sau khi DOM đã sẵn sàng
 document.addEventListener('DOMContentLoaded', () => {
     // Bắt sự kiện đóng chatbot khi click ra ngoài

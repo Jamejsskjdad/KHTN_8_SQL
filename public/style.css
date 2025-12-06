@@ -496,3 +496,87 @@ footer {
         height: 400px;
     }
 }
+/* ===== USER MENU (AVATAR + DROPDOWN) ===== */
+
+/* Nhóm bên trái: user menu + logo */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* User menu nằm ngay sát mép trái header-left */
+.user-menu {
+    position: relative;
+}
+
+/* Nút mặc định: Đăng nhập (hình pill) */
+.user-menu-button {
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #f0f2ff;
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 90px;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.1s;
+}
+
+.user-menu-button:hover {
+    background: #e0e4ff;
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+    transform: translateY(-1px);
+}
+
+/* Khi đã đăng nhập: dùng class logged-in để đổi thành avatar tròn */
+.user-menu-button.logged-in {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+    min-width: 36px;
+}
+
+/* Dropdown menu */
+.user-menu-dropdown {
+    position: absolute;
+    left: 0;            /* bám vào trái, đúng ý bạn */
+    top: 120%;
+    min-width: 180px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.2);
+    padding: 6px 0;
+    z-index: 1000;
+}
+
+/* class ẩn/hiện dùng trong JS */
+.hidden {
+    display: none;
+}
+
+.user-menu-item {
+    width: 100%;
+    padding: 8px 14px;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+}
+
+.user-menu-item:hover {
+    background: #f3f4ff;
+}

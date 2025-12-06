@@ -11,28 +11,45 @@
  <body><!-- Floating Background Icons -->
   <div id="floatingIcons"></div><!-- Header -->
   <header>
-   <div class="header-content">
-    <div>
-     <div class="logo" id="siteTitle">
-      WEBSITE HỖ TRỢ HỌC KHTN 8
-     </div>
-     <div class="subtitle" id="siteSubtitle">
-      Học tập thông minh, phát triển toàn diện
-     </div> 
+  <div class="header-content">
+    <!-- BÊN TRÁI: user menu + logo -->
+    <div class="header-left">
+      <!-- User menu -->
+      <div class="user-menu">
+        <button id="userMenuButton" class="user-menu-button">
+          <span id="userMenuLabel">Đăng nhập</span>
+        </button>
+        <div id="userMenuDropdown" class="user-menu-dropdown hidden">
+          <!-- JS sẽ fill nội dung -->
+        </div>
+      </div>
+
+      <!-- Logo + subtitle -->
+      <div>
+        <div class="logo" id="siteTitle">
+          WEBSITE HỖ TRỢ HỌC KHTN 8
+        </div>
+        <div class="subtitle" id="siteSubtitle">
+          Khoa học không khó – chỉ là cách chúng ta tiếp cận!
+        </div>
+      </div>
     </div>
-    <nav><button class="nav-btn active" onclick="showPage('home')">🏠 Trang chủ</button> <button class="nav-btn" onclick="showPage('videos')">🎥 Video</button> 
-    <button class="nav-btn" onclick="showPage('comics')">📚 Truyện tranh</button> 
-    <button class="nav-btn" onclick="showPage('flashcards')">
-      🎴 Flashcard
-    </button>
-    <button class="nav-btn" onclick="showPage('games')">🎮 Game</button> 
-    <button class="nav-btn" onclick="showPage('experiments')">🔬 Thí nghiệm</button> 
-    <button class="nav-btn" onclick="showPage('quizzes')">📝 Trắc nghiệm</button> 
-    <button class="nav-btn" onclick="showPage('inforgraphic')"> Inforgraphic</button>
-    <button class="nav-btn" onclick="showPage('admin')">⚙️ Quản trị</button>
+
+    <!-- BÊN PHẢI: thanh menu chính -->
+    <nav>
+      <button class="nav-btn active" onclick="showPage('home')">🏠 Trang chủ</button>
+      <button class="nav-btn" onclick="showPage('videos')">🎥 Video</button>
+      <button class="nav-btn" onclick="showPage('comics')">📚 Truyện tranh</button>
+      <button class="nav-btn" onclick="showPage('flashcards')">🎴 Flashcard</button>
+      <button class="nav-btn" onclick="showPage('games')">🎮 Game</button>
+      <button class="nav-btn" onclick="showPage('experiments')">🔬 Thí nghiệm</button>
+      <button class="nav-btn" onclick="showPage('quizzes')">📝 Trắc nghiệm</button>
+      <button class="nav-btn" onclick="showPage('inforgraphic')">Infographic</button>
+      <button class="nav-btn" onclick="showPage('admin')">⚙️ Quản trị</button>
     </nav>
-   </div>
-  </header><!-- Chatbot Bubble -->
+  </div>
+</header>
+<!-- Chatbot Bubble -->
   <div class="chatbot-bubble" onclick="openChatbot()"></div><!-- Chatbot Modal -->
   <div class="chatbot-modal" id="chatbotModal">
    <div class="chatbot-content"><button class="chatbot-close" onclick="closeChatbot()">×</button> <iframe class="chatbot-iframe" src="https://mindmaid.ai/vi/preview-section/tSToSbtJQRGUjA4j5d7DPb"></iframe>
