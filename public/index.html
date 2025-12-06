@@ -34,43 +34,35 @@
     </div>
   </div>
 
-  <!-- Tầng 2: thanh menu xanh -->
-  <div class="edu-main-nav">
-    <div class="edu-main-nav-inner">
-      <!-- Bên trái: menu user (giữ nguyên để JS hiện avatar + dropdown) -->
-      <div class="edu-nav-left">
+    <!-- Tầng 2: thanh menu xanh -->
+    <div class="edu-main-nav">
+      <div class="edu-main-nav-inner">
+        <!-- Menu ở giữa -->
+        <nav class="edu-nav-center">
+          <button class="nav-btn active" data-page="home" onclick="showPage('home')">Trang chủ</button>
+          <button class="nav-btn" data-page="videos" onclick="showPage('videos')">Video</button>
+          <button class="nav-btn" data-page="comics" onclick="showPage('comics')">Truyện tranh</button>
+          <button class="nav-btn" data-page="flashcards" onclick="showPage('flashcards')">Flashcard</button>
+          <button class="nav-btn" data-page="games" onclick="showPage('games')">Game</button>
+          <button class="nav-btn" data-page="experiments" onclick="showPage('experiments')">Thí nghiệm</button>
+          <button class="nav-btn" data-page="quizzes" onclick="showPage('quizzes')">Trắc nghiệm</button>
+          <button class="nav-btn" data-page="inforgraphic" onclick="showPage('inforgraphic')">Infographic</button>
+          <button class="nav-btn" data-page="admin" onclick="showPage('admin')">Quản trị</button>
+        </nav>
+      </div>
+
+      <!-- Profile TÁCH RIÊNG, bám mép phải toàn bộ dải xanh -->
+      <div class="edu-profile-wrapper">
         <div class="user-menu">
           <button id="userMenuButton" class="user-menu-button">
-            <!-- avatar tròn -->
             <span id="userMenuAvatar" class="user-avatar-circle">A</span>
-            <!-- chữ bên cạnh: Đăng nhập / username -->
             <span id="userMenuLabel" class="user-menu-label">Đăng nhập</span>
           </button>
           <div id="userMenuDropdown" class="user-menu-dropdown hidden"></div>
         </div>
       </div>
-
-      <!-- Ở giữa: các nút điều hướng (giữ class nav-btn + onclick để JS showPage vẫn hoạt động) -->
-      <nav class="edu-nav-center">
-        <button class="nav-btn active" data-page="home" onclick="showPage('home')">Trang chủ</button>
-        <button class="nav-btn" data-page="videos" onclick="showPage('videos')">Video</button>
-        <button class="nav-btn" data-page="comics" onclick="showPage('comics')">Truyện tranh</button>
-        <button class="nav-btn" data-page="flashcards" onclick="showPage('flashcards')">Flashcard</button>
-        <button class="nav-btn" data-page="games" onclick="showPage('games')">Game</button>
-        <button class="nav-btn" data-page="experiments" onclick="showPage('experiments')">Thí nghiệm</button>
-        <button class="nav-btn" data-page="quizzes" onclick="showPage('quizzes')">Trắc nghiệm</button>
-        <button class="nav-btn" data-page="inforgraphic" onclick="showPage('inforgraphic')">Infographic</button>
-        <button class="nav-btn" data-page="admin" onclick="showPage('admin')">Quản trị</button>
-      </nav>
-
-      <!-- Bên phải: nút tìm kiếm (tạm thời là icon, sau này bạn gắn chức năng cũng được) -->
-      <div class="edu-nav-right">
-        <button class="edu-search-btn" type="button" title="Tìm kiếm (đang xây dựng)">
-          🔍
-        </button>
-      </div>
     </div>
-  </div>
+
 </header>
 <!-- Chatbot Bubble -->
   <div class="chatbot-bubble" onclick="openChatbot()"></div><!-- Chatbot Modal -->

@@ -65,7 +65,7 @@ body {
 .edu-hero-inner {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 28px 24px;
+    padding: 5px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -78,8 +78,8 @@ body {
     gap: 16px;
 }
 .edu-logo {
-    height: 90px;
-    width: 90px;
+    height: 150px;
+    width: 150px;
 }
 
 
@@ -117,6 +117,7 @@ body {
 .edu-main-nav {
     background: #0073cf;
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    position: relative;     
 }
 
 .edu-main-nav-inner {
@@ -125,8 +126,16 @@ body {
     padding: 10px 24px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;   /* menu ở giữa */
     gap: 16px;
+}
+
+.edu-profile-wrapper {
+    position: absolute;
+    right: 24px;          /* cách mép phải 24px – muốn sát hẳn thì dùng 0 */
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;          /* để nổi lên trên */
 }
 
 /* Bên trái: user menu */
