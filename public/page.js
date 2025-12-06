@@ -52,6 +52,66 @@ function saveData() {
 function initApp() {
     loadData();
 }
+// Format thời gian ngắn gọn để hiển thị trên thẻ
+function formatDateTimeShort(value) {
+    if (!value) return '';
+    try {
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return '';
+        return d.toLocaleString('vi-VN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch {
+        return '';
+    }
+}
+
+// escape thô để tránh lỗi khi tiêu đề / tên có ký tự đặc biệt
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// Hàm build HTML chung cho mọi loại card (video, truyện, game, infographic...)
+function buildCardHtml(item, type, canDelete) {
+    const icon = typeIcons[type] || '';
+
+    const authorName = item.authorName || 'Admin';
+    const authorClass = item.authorClass ? ` - Lớp ${item.authorClass}` : '';
+    const createdText = formatDateTimeShort(item.createdAt);
+
+    const metaAuthor = `Người đăng: ${escapeHtml(authorName + authorClass)}`;
+    const metaTime = createdText ? `Đăng ngày: ${createdText}` : '';
+
+    return `
+        <div class="card">
+            ${canDelete ? `
+                <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️️🗑️</button>
+            ` : ''}
+
+            <div class="card-title">
+                ${icon} ${escapeHtml(item.title || '')}
+            </div>
+
+            <div class="card-meta">
+                <span class="card-author">${metaAuthor}</span>
+                ${metaTime ? `<span class="card-time">${metaTime}</span>` : ''}
+            </div>
+
+            <button class="card-btn" onclick="openLink(event, '${item.link}')">
+                Xem ngay
+            </button>
+        </div>
+    `;
+}
 
 function renderAllContent() {
     // thêm inforgraphic vào danh sách type
@@ -62,6 +122,7 @@ function renderAllContent() {
         if (!grid) return;
 
         const items = allContent.filter(item => item.type === type);
+        const canDelete = authRole === 'admin';
 
         if (items.length === 0) {
             grid.innerHTML = `
@@ -72,31 +133,10 @@ function renderAllContent() {
                 </div>
             `;
         } else {
-            // Nếu là inforgraphic thì hiển thị ảnh
-            if (type === 'inforgraphic') {
-                const canDelete = authRole === 'admin';
-                    grid.innerHTML = items.map(item => `
-                    <div class="card">
-                        ${canDelete ? `
-                            <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️️🗑️</button>
-                        ` : ''}
-                        <div class="card-title">${typeIcons[type] || ''} ${item.title}</div>
-                        <button class="card-btn" onclick="openLink(event, '${item.link}')">Xem ngay</button>
-                    </div>
-                    `).join('');
-            } else {
-                // Các loại khác giữ nguyên cách hiển thị
-                const canDelete = authRole === 'admin';
-                grid.innerHTML = items.map(item => `
-                <div class="card">
-                    ${canDelete ? `
-                        <button class="delete-btn" onclick="deleteItem(event, '${item.__backendId}')" title="Xóa">️️🗑️</button>
-                    ` : ''}
-                    <div class="card-title">${typeIcons[type] || ''} ${item.title}</div>
-                    <button class="card-btn" onclick="openLink(event, '${item.link}')">Xem ngay</button>
-                </div>
-                `).join('');
-            }
+            // Dùng chung 1 hàm buildCardHtml cho mọi loại
+            grid.innerHTML = items
+                .map(item => buildCardHtml(item, type, canDelete))
+                .join('');
         }
     });
 }

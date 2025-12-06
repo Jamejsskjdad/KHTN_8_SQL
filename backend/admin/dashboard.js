@@ -41,8 +41,16 @@ ensureFolder(INFO_JSON_DIR);
 // GHI FILE JSON CHO BÀI ĐÃ DUYỆT (phục vụ website chính)
 // =====================================================
 
+// Dùng khi ADMIN DUYỆT bài từ bảng Posts
 function saveApprovedPostToData(post) {
-  const { Type: type, Title: title, LinkOrImage } = post;
+  const {
+    Type: type,
+    Title: title,
+    LinkOrImage,
+    CreatedAt,
+    AuthorName,
+    AuthorClass,
+  } = post;
 
   if (!TYPES.includes(type)) {
     console.warn('Loại nội dung không hợp lệ, bỏ qua:', type);
@@ -51,13 +59,15 @@ function saveApprovedPostToData(post) {
 
   const id = Date.now().toString();
 
-  let link;
-  if (type === 'inforgraphic') {
-    // Với infographic: chỉ lưu JSON, link trỏ tới LinkOrImage (URL / path)
-    link = LinkOrImage || '';
-  } else {
-    link = LinkOrImage || '';
-  }
+  const link = LinkOrImage || '';
+
+  // Ưu tiên tên từ DB, fallback 'Admin'
+  const authorName  = AuthorName  || 'Admin';
+  const authorClass = AuthorClass || null;
+
+  const createdAtIso = CreatedAt
+    ? new Date(CreatedAt).toISOString()
+    : new Date().toISOString();
 
   const newItem = {
     __backendId: id,
@@ -65,7 +75,9 @@ function saveApprovedPostToData(post) {
     type,
     title,
     link,
-    createdAt: new Date().toISOString(),
+    authorName,
+    authorClass,
+    createdAt: createdAtIso,
   };
 
   const filePath =
@@ -143,8 +155,7 @@ async function getSummary(req, res) {
     const approved = row.Approved || 0;
     const rejected = row.Rejected || 0;
 
-    // "Người dùng hoạt động" – ở đây tạm tính số user
-    // có bài đăng trong 30 ngày gần nhất
+    // "Người dùng hoạt động" – tạm tính số user có bài trong 30 ngày gần nhất
     const usersResult = await pool.request().query(`
       SELECT COUNT(DISTINCT UserId) AS ActiveUsers
       FROM Posts
@@ -163,8 +174,6 @@ async function getSummary(req, res) {
 // =====================================================
 // API: DUYỆT BÀI
 // POST /api/admin/posts/:id/approve
-// - đổi Status = 'approved'
-// - ghi file JSON ra thư mục data/ để website hiển thị
 // =====================================================
 
 async function approvePost(req, res) {
@@ -176,13 +185,22 @@ async function approvePost(req, res) {
   try {
     const pool = await getPool();
 
-    // Lấy thông tin bài trước
+    // Lấy bài + thông tin người đăng để ghi vào JSON
     const result = await pool.request()
       .input('postId', postId)
       .query(`
-        SELECT TOP 1 PostId, Title, Type, LinkOrImage, Status
-        FROM Posts
-        WHERE PostId = @postId
+        SELECT TOP 1
+          p.PostId,
+          p.Title,
+          p.Type,
+          p.LinkOrImage,
+          p.Status,
+          p.CreatedAt,
+          u.Username AS AuthorName,  -- dùng Username làm "họ tên"
+          u.class    AS AuthorClass  -- cột class trong bảng Users
+        FROM Posts p
+        JOIN Users u ON p.UserId = u.UserId
+        WHERE p.PostId = @postId
       `);
 
     if (result.recordset.length === 0) {
@@ -197,7 +215,7 @@ async function approvePost(req, res) {
         .json({ error: 'Bài viết này đã được duyệt trước đó' });
     }
 
-    // Cập nhật trạng thái trong DB
+    // Cập nhật trạng thái
     await pool.request()
       .input('postId', postId)
       .query(`
@@ -206,7 +224,7 @@ async function approvePost(req, res) {
         WHERE PostId = @postId
       `);
 
-    // Ghi file JSON cho website
+    // Ghi JSON (kèm authorName, authorClass, createdAt)
     const newItem = saveApprovedPostToData(post);
     if (!newItem) {
       return res.status(500).json({
@@ -224,8 +242,6 @@ async function approvePost(req, res) {
 // =====================================================
 // API: TỪ CHỐI BÀI
 // POST /api/admin/posts/:id/reject
-// - KHÔNG xoá row nữa, chỉ đổi Status = 'rejected'
-// - Nếu là infographic, có thể xoá file ảnh (không ảnh hưởng dashboard)
 // =====================================================
 
 async function rejectPost(req, res) {
@@ -252,7 +268,6 @@ async function rejectPost(req, res) {
     const post = result.recordset[0];
 
     if (post.Status === 'rejected') {
-      // đã bị từ chối trước đó
       return res
         .status(400)
         .json({ error: 'Bài viết này đã bị từ chối trước đó' });
@@ -290,11 +305,9 @@ async function rejectPost(req, res) {
 // =====================================================
 
 module.exports = {
-  // dùng cho dashboard mới
   getPostsByStatus,
   getSummary,
   approvePost,
   rejectPost,
-  // hàm cũ vẫn export nếu nơi khác dùng
   saveApprovedPostToData,
 };

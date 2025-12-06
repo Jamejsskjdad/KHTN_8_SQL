@@ -137,6 +137,23 @@ body {
     transform: translateY(-50%);
     z-index: 10;          /* để nổi lên trên */
 }
+.card .card-meta {
+    margin-top: 6px;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: #4b5563; /* xám đậm */
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.card .card-author {
+    font-weight: 500;
+}
+
+.card .card-time {
+    opacity: 0.85;
+}
 
 /* Bên trái: user menu */
 .edu-nav-left {

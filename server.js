@@ -166,7 +166,9 @@ app.post(
       type,
       title,
       link,
-      createdAt: new Date().toISOString()
+      authorName: 'Admin',    // admin đăng trực tiếp
+      authorClass: null,      // admin không có lớp
+      createdAt: new Date().toISOString(),
     };
 
     const filePath = path.join(DATA_DIR, type, `${id}.json`);
