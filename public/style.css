@@ -4,8 +4,34 @@ body {
     padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100%;
+    min-height: 100vh;           /* quan trọng */
     position: relative;
+
+    display: flex;                /* flex layout */
+    flex-direction: column;       /* xếp theo cột: header - main - footer */
+}
+
+.edu-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-shrink: 0;       /* không bị ép nhỏ */
+}
+
+/* cho main chiếm hết phần trống còn lại */
+main {
+    flex: 1 0 auto;       /* quan trọng: main giãn để đẩy footer xuống */
+    padding: 24px 0 32px; /* tuỳ bạn, đang dùng để cách header + footer 1 chút */
+}
+
+/* Footer chỉ nằm dưới, không cần margin-top lớn nữa */
+footer {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: 0;        /* bỏ 40px cũ nếu đang có */
+    flex-shrink: 0;
 }
 
 .floating-icon {
