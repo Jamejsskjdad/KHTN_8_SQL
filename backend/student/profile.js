@@ -12,7 +12,7 @@ async function getProfile(req, res) {
     const result = await pool.request()
       .input('userId', req.user.userId)
       .query(`
-        SELECT UserId, Username, Email, Role
+        SELECT UserId, Username, Email, Role, Class
         FROM Users
         WHERE UserId = @userId
       `);

@@ -21,6 +21,7 @@
         <p><strong>Username:</strong> <span id="username">...</span></p>
         <p><strong>Email:</strong> <span id="email">...</span></p>
         <p><strong>Role:</strong> <span id="role">...</span></p>
+        <p><strong>Class:</strong> <span id="class">...</span></p>\
       </section>
 
       <section class="card posts">
@@ -67,6 +68,7 @@
         document.getElementById('username').textContent = data.Username;
         document.getElementById('email').textContent    = data.Email || '(chưa có)';
         document.getElementById('role').textContent     = data.Role;
+        document.getElementById('class').textContent    = data.Class || '(chưa có)';
       } catch (err) {
         console.error(err);
         alert('Lỗi tải profile student');

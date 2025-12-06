@@ -9,17 +9,20 @@ const { SECRET } = require('./auth/middleware');  // middleware nằm trong back
  * Đăng ký student (role mặc định: 'user')
  * POST /api/auth/register
  */
-async function register(req, res) {
-  const { username, email, password } = req.body || {};
+// backend/login.js
 
-  if (!username || !email || !password) {
-    return res.status(400).json({ error: 'Thiếu username, email hoặc password' });
+async function register(req, res) {
+  const { username, email, password, className } = req.body || {};
+  // className: tên lớp người dùng nhập, ví dụ "8A1"
+
+  if (!username || !email || !password || !className) {
+    return res.status(400).json({ error: 'Thiếu username, email, password hoặc class' });
   }
 
   try {
     const pool = await getPool();
 
-    // kiểm tra trùng username / email
+    // kiểm tra trùng
     const check = await pool.request()
       .input('username', username)
       .input('email', email)
@@ -39,10 +42,11 @@ async function register(req, res) {
       .input('username', username)
       .input('email', email)
       .input('passwordHash', hash)
+      .input('class', className) // <-- thêm dòng này
       .query(`
-        INSERT INTO Users (Username, Email, PasswordHash, Role)
+        INSERT INTO Users (Username, Email, PasswordHash, Role, Class)
         OUTPUT INSERTED.UserId, INSERTED.Role
-        VALUES (@username, @email, @passwordHash, 'user')
+        VALUES (@username, @email, @passwordHash, 'user', @class)
       `);
 
     const user = result.recordset[0];
@@ -57,6 +61,7 @@ async function register(req, res) {
       token,
       role: user.Role,
       username,
+      class: className, // nếu muốn trả về luôn
     });
   } catch (err) {
     console.error('Lỗi register:', err);
@@ -178,7 +183,7 @@ async function me(req, res) {
     const result = await pool.request()
       .input('userId', req.user.userId)
       .query(`
-        SELECT UserId, Username, Email, Role, Email
+        SELECT UserId, Username, Email, Role, Class
         FROM Users
         WHERE UserId = @userId
       `);
