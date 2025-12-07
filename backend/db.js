@@ -1,4 +1,4 @@
-// db.js
+// backend/db.js
 const sql = require('mssql');
 
 const config = {

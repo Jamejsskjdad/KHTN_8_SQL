@@ -1,0 +1,234 @@
+<!-- public/frontend/admin/views/posts.html -->
+
+<!-- HEADER -->
+<header class="db-header">
+    <div class="db-header-left">
+      <h1 class="db-header-title">Dashboard duyệt bài</h1>
+      <p class="db-header-subtitle">
+        Quản lý và phê duyệt nội dung do người dùng gửi lên.
+      </p>
+    </div>
+  </header>
+  
+  <!-- CONTENT -->
+  <main class="db-content">
+  
+    <!-- THỐNG KÊ NHANH -->
+    <section class="db-section">
+      <h2 class="db-section-title">Thống kê nhanh</h2>
+      <div class="db-metrics-grid">
+        <article class="db-metric-card">
+          <div class="db-metric-icon db-metric-icon--blue">⏳</div>
+          <div>
+            <div class="db-metric-label">Bài chờ duyệt</div>
+            <div id="metricPending" class="db-metric-value">0</div>
+          </div>
+        </article>
+  
+        <article class="db-metric-card">
+          <div class="db-metric-icon db-metric-icon--green">✅</div>
+          <div>
+            <div class="db-metric-label">Bài đã duyệt</div>
+            <div id="metricApproved" class="db-metric-value">0</div>
+          </div>
+        </article>
+  
+        <article class="db-metric-card">
+          <div class="db-metric-icon db-metric-icon--red">❌</div>
+          <div>
+            <div class="db-metric-label">Bài bị từ chối</div>
+            <div id="metricRejected" class="db-metric-value">0</div>
+          </div>
+        </article>
+  
+        <article class="db-metric-card">
+          <div class="db-metric-icon db-metric-icon--cyan">👥</div>
+          <div>
+            <div class="db-metric-label">Người dùng hoạt động</div>
+            <div id="metricUsers" class="db-metric-value">0</div>
+          </div>
+        </article>
+      </div>
+    </section>
+  
+    <!-- DANH SÁCH BÀI CHỜ DUYỆT -->
+    <section class="db-section db-section--table">
+      <div class="db-table-header">
+        <div class="db-table-header-left">
+          <h2 class="db-section-title">Danh sách bài chờ duyệt</h2>
+          <span id="badgeTotal" class="db-badge">0 bài</span>
+        </div>
+  
+        <div class="db-table-filters">
+          <div class="db-filter">
+            <label for="filterType">Loại:</label>
+            <select id="filterType" onchange="applyFilters()">
+              <option value="all">Tất cả</option>
+              <option value="videos">Video</option>
+              <option value="comics">Truyện tranh</option>
+              <option value="flashcards">Flashcard</option>
+              <option value="experiments">Thí nghiệm</option>
+              <option value="games">Game</option>
+              <option value="inforgraphic">Infographic</option>
+            </select>
+          </div>
+  
+          <div class="db-filter">
+            <label for="filterStatus">Trạng thái:</label>
+            <select id="filterStatus" onchange="applyFilters()">
+              <option value="all">Tất cả</option>
+              <option value="pending">Chờ duyệt</option>
+              <option value="approved">Đã duyệt</option>
+              <option value="rejected">Bị từ chối</option>
+            </select>
+          </div>
+        </div>
+      </div>
+  
+      <div class="db-table-wrapper">
+        <table class="db-table">
+          <thead>
+            <tr>
+              <th>ID bài</th>
+              <th>Tiêu đề bài</th>
+              <th>Loại nội dung</th>
+              <th>Người gửi</th>
+              <th>Thời gian gửi</th>
+              <th>Trạng thái</th>
+              <th class="db-th-actions">Hành động</th>
+            </tr>
+          </thead>
+          <tbody id="submissionsBody">
+            <!-- các hàng sẽ được render bằng JS -->
+          </tbody>
+        </table>
+      </div>
+  
+      <div id="emptyState" class="db-empty-state" style="display:none;">
+        Không có bài nào khớp bộ lọc hiện tại.
+      </div>
+    </section>
+  
+  </main>
+  
+  <!-- MODAL CHI TIẾT -->
+  <div id="detailBackdrop" class="db-modal-backdrop" style="display:none;">
+    <div class="db-modal">
+      <header class="db-modal-header">
+        <div>
+          <div class="db-modal-subtitle">Xem chi tiết bài <span id="detailId"></span></div>
+          <h3 id="detailTitle" class="db-modal-title">Tiêu đề bài</h3>
+        </div>
+        <button type="button" class="db-btn-icon" onclick="closeDetailModal()">✕</button>
+      </header>
+  
+      <div class="db-modal-body">
+        <section>
+          <h4 class="db-modal-section-title">Preview nội dung</h4>
+          <div id="detailPreview" class="db-preview-box">
+            <!-- demo preview -->
+          </div>
+        </section>
+  
+        <section class="db-modal-grid">
+          <div>
+            <h4 class="db-modal-label">Tiêu đề</h4>
+            <p id="detailTitleText"></p>
+  
+            <h4 class="db-modal-label">Mô tả</h4>
+            <p id="detailDescription"></p>
+  
+            <h4 class="db-modal-label">Loại bài</h4>
+            <span id="detailType" class="db-pill db-pill--blue"></span>
+          </div>
+  
+          <div>
+            <h4 class="db-modal-label">Link / file đính kèm</h4>
+            <p id="detailLink" class="db-link"></p>
+  
+            <h4 class="db-modal-label">Người gửi</h4>
+            <p id="detailAuthor"></p>
+  
+            <h4 class="db-modal-label">Thời gian gửi</h4>
+            <p id="detailSubmittedAt"></p>
+          </div>
+        </section>
+  
+        <section>
+          <h4 class="db-modal-section-title">Ghi chú / yêu cầu chỉnh sửa</h4>
+          <textarea id="detailFeedback" rows="3"
+                    placeholder="Nhập lý do từ chối hoặc yêu cầu chỉnh sửa (nếu có)..."></textarea>
+        </section>
+      </div>
+  
+      <footer class="db-modal-footer">
+        <div id="detailStatusPill"></div>
+        <div class="db-modal-actions">
+          <button class="db-btn db-btn--primary" onclick="handleApprove()">✔️ Duyệt bài</button>
+          <button class="db-btn db-btn--danger" onclick="handleReject()">❌ Từ chối</button>
+          <button class="db-btn db-btn--warning" onclick="handleRequestChanges()">✏️ Gửi yêu cầu chỉnh sửa</button>
+        </div>
+      </footer>
+    </div>
+  </div>
+  
+<!-- MODAL CHI TIẾT (FRONTEND DEMO, BACKEND SAU NỐI VÀO) -->
+<div id="detailBackdrop" class="db-modal-backdrop" style="display:none;">
+  <div class="db-modal">
+    <header class="db-modal-header">
+      <div>
+        <div class="db-modal-subtitle">Xem chi tiết bài <span id="detailId"></span></div>
+        <h3 id="detailTitle" class="db-modal-title">Tiêu đề bài</h3>
+      </div>
+      <button type="button" class="db-btn-icon" onclick="closeDetailModal()">✕</button>
+    </header>
+
+    <div class="db-modal-body">
+      <section>
+        <h4 class="db-modal-section-title">Preview nội dung</h4>
+        <div id="detailPreview" class="db-preview-box">
+          <!-- demo preview -->
+        </div>
+      </section>
+
+      <section class="db-modal-grid">
+        <div>
+          <h4 class="db-modal-label">Tiêu đề</h4>
+          <p id="detailTitleText"></p>
+
+          <h4 class="db-modal-label">Mô tả</h4>
+          <p id="detailDescription"></p>
+
+          <h4 class="db-modal-label">Loại bài</h4>
+          <span id="detailType" class="db-pill db-pill--blue"></span>
+        </div>
+
+        <div>
+          <h4 class="db-modal-label">Link / file đính kèm</h4>
+          <p id="detailLink" class="db-link"></p>
+
+          <h4 class="db-modal-label">Người gửi</h4>
+          <p id="detailAuthor"></p>
+
+          <h4 class="db-modal-label">Thời gian gửi</h4>
+          <p id="detailSubmittedAt"></p>
+        </div>
+      </section>
+
+      <section>
+        <h4 class="db-modal-section-title">Ghi chú / yêu cầu chỉnh sửa</h4>
+        <textarea id="detailFeedback" rows="3"
+                  placeholder="Nhập lý do từ chối hoặc yêu cầu chỉnh sửa (nếu có)..."></textarea>
+      </section>
+    </div>
+
+    <footer class="db-modal-footer">
+      <div id="detailStatusPill"></div>
+      <div class="db-modal-actions">
+        <button class="db-btn db-btn--primary" onclick="handleApprove()">✔️ Duyệt bài</button>
+        <button class="db-btn db-btn--danger" onclick="handleReject()">❌ Từ chối</button>
+        <button class="db-btn db-btn--warning" onclick="handleRequestChanges()">✏️ Gửi yêu cầu chỉnh sửa</button>
+      </div>
+    </footer>
+  </div>
+</div>
