@@ -42,6 +42,39 @@ async function loadData() {
     }
     renderAllContent();
 }
+// ===== TOAST THÔNG BÁO NHẸ =====
+let globalToastEl = null;
+let globalToastTimer = null;
+
+function showToast(type, message) {
+  if (!globalToastEl) {
+    globalToastEl = document.createElement('div');
+    globalToastEl.id = 'global-toast';
+    globalToastEl.style.position = 'fixed';
+    globalToastEl.style.bottom = '24px';
+    globalToastEl.style.right = '24px';
+    globalToastEl.style.zIndex = '5000';
+    globalToastEl.style.minWidth = '220px';
+    globalToastEl.style.maxWidth = '320px';
+    globalToastEl.style.padding = '10px 16px';
+    globalToastEl.style.borderRadius = '10px';
+    globalToastEl.style.boxShadow = '0 6px 18px rgba(15,23,42,0.35)';
+    globalToastEl.style.color = '#fff';
+    globalToastEl.style.fontSize = '14px';
+    globalToastEl.style.lineHeight = '1.4';
+    globalToastEl.style.transition = 'opacity 0.25s ease';
+    document.body.appendChild(globalToastEl);
+  }
+
+  globalToastEl.style.background = type === 'error' ? '#ef4444' : '#22c55e';
+  globalToastEl.textContent = message;
+  globalToastEl.style.opacity = '1';
+
+  if (globalToastTimer) clearTimeout(globalToastTimer);
+  globalToastTimer = setTimeout(() => {
+    globalToastEl.style.opacity = '0';
+  }, 2500);
+}
 
 // Ta không dùng saveData() tổng nữa, mà gọi API khi thêm/xoá
 function saveData() {
@@ -224,32 +257,48 @@ function deleteItem(event, itemId) {
 
 async function confirmDelete(itemId) {
     try {
-        await fetch(`/api/content/${itemId}`, {
-            method: 'DELETE'
-        });
-
-        allContent = allContent.filter(item => item.__backendId !== itemId);
-        renderAllContent();
-
-        if (window.currentConfirmModal) {
-            document.body.removeChild(window.currentConfirmModal);
-            window.currentConfirmModal = null;
+      const res = await fetch(`/api/content/${itemId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': authToken ? 'Bearer ' + authToken : ''
         }
-
-        const successDiv = document.createElement('div');
-        successDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #4CAF50; color: white; padding: 15px; border-radius: 8px; z-index: 4000;';
-        successDiv.textContent = 'Đã xóa thành công!';
-        document.body.appendChild(successDiv);
-        setTimeout(() => {
-            if (document.body.contains(successDiv)) {
-                document.body.removeChild(successDiv);
-            }
-        }, 3000);
+      });
+  
+      let data = {};
+      try {
+        data = await res.json();
+      } catch (e) {
+        // nếu backend không trả JSON cũng kệ
+      }
+  
+      if (!res.ok || data.error) {
+        throw new Error(data.error || `Xóa nội dung thất bại (mã ${res.status})`);
+      }
+  
+      // Xóa trên client: có thể gọi loadData() cho chắc
+      allContent = allContent.filter(item => item.__backendId !== itemId);
+      renderAllContent();
+      // hoặc: await loadData();  // nếu muốn sync tuyệt đối với backend
+  
+      // Đóng modal xác nhận
+      if (window.currentConfirmModal) {
+        document.body.removeChild(window.currentConfirmModal);
+        window.currentConfirmModal = null;
+      }
+  
+      showToast('success', 'Đã xóa nội dung thành công!');
     } catch (err) {
-        console.error(err);
-        alert('Lỗi khi xoá nội dung');
+      console.error('Lỗi xoá nội dung:', err);
+  
+      if (window.currentConfirmModal) {
+        document.body.removeChild(window.currentConfirmModal);
+        window.currentConfirmModal = null;
+      }
+  
+      showToast('error', err.message || 'Lỗi khi xoá nội dung. Vui lòng thử lại.');
     }
-}
+  }
+  
 
 function cancelDelete() {
     if (window.currentConfirmModal) {
@@ -398,12 +447,12 @@ async function handleSubmit(event) {
           throw new Error(data.error || 'Thêm nội dung thất bại');
         }
   
-        alert('Thêm nội dung thành công.');
+        showToast('success', 'Đã thêm nội dung mới.');
         event.target.reset();
         loadData();
       } catch (err) {
         console.error(err);
-        alert(err.message || 'Lỗi thêm nội dung.');
+        showToast('error', err.message || 'Lỗi thêm nội dung.');
       }
     }
   }
