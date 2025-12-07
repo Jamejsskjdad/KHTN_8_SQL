@@ -821,24 +821,70 @@ if (appState.modal === "create") {
     saveBtn.className =
     "focus-ring inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#4b3ccf] to-[#007bff] px-4 py-1.5 text-xs font-medium text-white shadow-md hover:opacity-95 transition-opacity";
     saveBtn.textContent = (window.elementSdk && window.elementSdk.config.edit_button_text) || defaultConfig.edit_button_text;
-    saveBtn.addEventListener("click", () => {
-    const updated = appState.users.map((u) => {
-        if (u.id !== currentUser.id) return u;
-        return {
-        ...u,
-        fullName: document.getElementById("edit-fullname").value || u.fullName,
-        email: document.getElementById("edit-email").value || u.email,
-        className:
-            (document.getElementById("edit-class").value || "").trim() ||
-            u.className,
-        role: document.getElementById("edit-role").value || u.role
+    saveBtn.addEventListener("click", async () => {
+        if (!currentUser) return;
+  
+        const fullName = document.getElementById("edit-fullname").value.trim();
+        const email = document.getElementById("edit-email").value.trim();
+        let className = document.getElementById("edit-class").value.trim();
+        const roleLabel = document.getElementById("edit-role").value; // "Admin" | "User"
+        const rawPassword = document.getElementById("edit-password").value;
+  
+        if (!fullName || !email || !roleLabel) {
+          showToast("error", "Vui lòng nhập đủ họ tên, email và quyền.");
+          return;
+        }
+  
+        // UI dùng "Admin"/"User", backend dùng "admin"/"user"
+        const role = roleLabel === "Admin" ? "admin" : "user";
+  
+        // Nếu là Admin thì không cần/lưu class
+        if (roleLabel === "Admin") {
+          className = "";
+        }
+  
+        // Nếu mật khẩu trống thì không gửi lên (backend hiểu là không đổi mật khẩu)
+        const password = rawPassword.trim();
+        const payload = {
+          fullName,
+          email,
+          className,
+          role,
         };
-    });
-    appState.users = updated;
-    renderUserTable();
-    showToast("success", "Đã lưu thay đổi người dùng.");
-    closeModal();
-    });
+        if (password) {
+          payload.password = password;
+        }
+  
+        try {
+          const token =
+            localStorage.getItem("authToken") || localStorage.getItem("token");
+  
+          const res = await fetch(`/api/admin/users/${currentUser.id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: "Bearer " + token } : {}),
+            },
+            body: JSON.stringify(payload),
+          });
+  
+          const data = await res.json();
+          if (!res.ok || data.error) {
+            throw new Error(data.error || "Cập nhật người dùng thất bại");
+          }
+  
+          // Sau khi backend OK → load lại danh sách user cho chắc
+          await fetchUsersFromServer();
+          renderUserTable();
+          renderUserPagination();
+  
+          showToast("success", "Đã cập nhật thông tin người dùng.");
+          closeModal();
+        } catch (err) {
+          console.error("Lỗi update user:", err);
+          showToast("error", "Không cập nhật được người dùng. Vui lòng thử lại.");
+        }
+      });
     modalFooter.appendChild(saveBtn);
 } else if (appState.modal === "delete") {
     modalTitle.textContent = (window.elementSdk && window.elementSdk.config.delete_modal_title) || defaultConfig.delete_modal_title;
