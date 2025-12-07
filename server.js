@@ -6,6 +6,7 @@ const multer = require('multer');
 const authRoutes = require('./backend/auth/routes');
 const studentRoutes = require('./backend/student/routes');
 const adminRoutes = require('./backend/admin/routes');
+const { getPool } = require('./backend/db');  // THÊM DÒNG NÀY
 
 // 👉 THÊM DÒNG NÀY ĐỂ DÙNG requireAuth, requireAdmin
 const { requireAuth, requireAdmin } = require('./backend/auth/middleware');
@@ -127,20 +128,45 @@ app.post(
   requireAuth,
   requireAdmin,
   upload.single('image'),
-  (req, res) => {
+  async (req, res) => {
     const { type, title, link } = req.body;
 
     if (!TYPES.includes(type)) {
       return res.status(400).json({ error: 'Invalid type' });
     }
 
-    // Inforgraphic: phải có file ảnh
+    // ===== LẤY THÔNG TIN ADMIN TỪ BẢNG USERS =====
+    let authorName  = 'Admin';
+    let authorClass = null;
+
+    try {
+      const pool = await getPool();
+      const r = await pool.request()
+        .input('UserId', req.user.userId)         // userId có trong token
+        .query(`
+          SELECT Fullname, Username, class
+          FROM Users
+          WHERE UserId = @UserId
+        `);
+
+      if (r.recordset.length > 0) {
+        const u = r.recordset[0];
+        authorName  = u.Fullname || 'Admin';
+        authorClass = u.class || null;
+      }
+    } catch (e) {
+      console.warn('Không lấy được thông tin admin từ Users, dùng mặc định Admin:', e);
+    }
+
+    const id          = Date.now().toString();
+    const createdAt   = new Date().toISOString();
+
+    // ===== Inforgraphic: phải có file ảnh =====
     if (type === 'inforgraphic') {
       if (!req.file) {
         return res.status(400).json({ error: 'Image is required' });
       }
 
-      const id = Date.now().toString();
       const imagePath = `/inforgraphic_pic/${req.file.filename}`;
 
       const newItem = {
@@ -149,7 +175,9 @@ app.post(
         type: 'inforgraphic',
         title,
         link: imagePath,
-        createdAt: new Date().toISOString()
+        authorName,
+        authorClass,
+        createdAt,
       };
 
       const jsonPath = path.join(INFO_JSON_DIR, `${id}.json`);
@@ -158,17 +186,16 @@ app.post(
       return res.json(newItem);
     }
 
-    // Các loại khác: giữ link
-    const id = Date.now().toString();
+    // ===== Các loại khác: dùng link =====
     const newItem = {
       __backendId: id,
       id,
       type,
       title,
       link,
-      authorName: 'Admin',    // admin đăng trực tiếp
-      authorClass: null,      // admin không có lớp
-      createdAt: new Date().toISOString(),
+      authorName,
+      authorClass,
+      createdAt,
     };
 
     const filePath = path.join(DATA_DIR, type, `${id}.json`);
@@ -177,6 +204,7 @@ app.post(
     res.json(newItem);
   }
 );
+
 
 /**
  * DELETE /api/content/:id – xoá item
