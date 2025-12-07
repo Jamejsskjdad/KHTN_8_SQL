@@ -25,8 +25,8 @@ router.get('/users', requireAuth, requireAdmin, userManager.getAllUsers);
 router.post('/users', requireAuth, requireAdmin, userManager.createUser);
 // PUT /api/admin/users/:id
 router.put('/users/:id', requireAuth, requireAdmin, userManager.updateUser);
-
-
+// DELETE /api/admin/users/:id
+router.delete('/users/:id', requireAuth, requireAdmin, userManager.deleteUser);
 // Dashboard: lấy danh sách bài theo trạng thái
 router.get('/posts', requireAuth, requireAdmin, getPostsByStatus);
 router.get('/posts/summary', requireAuth, requireAdmin, getSummary);

@@ -181,9 +181,74 @@ async function createUser(req, res) {
         .json({ error: 'Lỗi server khi tạo người dùng' });
     }
   }
+/**
+ * DELETE /api/admin/users/:id
+ * Xóa 1 user khỏi hệ thống
+ */
+async function deleteUser(req, res) {
+    const userId = parseInt(req.params.id, 10);
+  
+    if (!userId || Number.isNaN(userId)) {
+      return res.status(400).json({ error: 'UserId không hợp lệ' });
+    }
+  
+    // (tuỳ chọn) Không cho xóa chính mình
+    if (req.user && req.user.userId === userId) {
+      return res
+        .status(400)
+        .json({ error: 'Bạn không thể tự xóa tài khoản của chính mình' });
+    }
+  
+    try {
+      const pool = await getPool();
+      const request = pool.request();
+      request.input('UserId', sql.Int, userId);
+  
+      // Nếu có các bảng con liên quan tới user thì xóa trước
+      // 👉 SỬA lại tên bảng/cột CHO ĐÚNG với DB của bạn
+      await request.query(`
+        -- Ví dụ: nếu có bảng Posts tham chiếu Users(UserId)
+        DELETE FROM Posts WHERE UserId = @UserId;
+  
+        -- Nếu còn bảng khác (Comments, Likes, ...) thì thêm DELETE ở đây
+  
+        -- Cuối cùng xoá user
+        DELETE FROM Users WHERE UserId = @UserId;
+      `);
+  
+      // Kiểm tra lại user còn tồn tại không
+      const checkResult = await pool.request()
+        .input('UserId', sql.Int, userId)
+        .query('SELECT UserId FROM Users WHERE UserId = @UserId');
+  
+      if (checkResult.recordset.length > 0) {
+        // vẫn còn user => có gì đó sai
+        return res
+          .status(500)
+          .json({ error: 'Không thể xóa người dùng do lỗi không xác định' });
+      }
+  
+      return res.json({ message: 'Xóa người dùng thành công' });
+    } catch (err) {
+      console.error('Lỗi deleteUser:', err);
+  
+      // Nếu là lỗi vi phạm khóa ngoại (FK) – mã lỗi 547 của SQL Server
+      if (err.number === 547) {
+        return res.status(409).json({
+          error:
+            'Không thể xóa vì tài khoản này đang có dữ liệu liên quan (bài viết, bình luận...). Hãy xóa hoặc chuyển dữ liệu đó trước.',
+        });
+      }
+  
+      return res
+        .status(500)
+        .json({ error: 'Lỗi server khi xóa người dùng' });
+    }
+  }
   
 module.exports = {
   getAllUsers,
   updateUser,
   createUser,  
+  deleteUser,
 };

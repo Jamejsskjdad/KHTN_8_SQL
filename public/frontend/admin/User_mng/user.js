@@ -926,23 +926,46 @@ if (appState.modal === "create") {
     delBtn.className =
     "focus-ring inline-flex items-center justify-center rounded-full bg-red-500 px-4 py-1.5 text-xs font-medium text-white shadow-md hover:bg-red-400 transition-colors";
     delBtn.textContent = (window.elementSdk && window.elementSdk.config.delete_button_text) || defaultConfig.delete_button_text;
-    delBtn.addEventListener("click", () => {
-    appState.users = appState.users.filter(
-        (u) => u.id !== appState.selectedUserId
-    );
-    if (
-        (appState.currentPage - 1) * appState.pageSize >= appState.users.length
-    ) {
-        appState.currentPage = Math.max(
-        1,
-        Math.ceil(appState.users.length / appState.pageSize)
-        );
-    }
-    renderUserTable();
-    renderUserPagination();
-    showToast("success", "Đã xóa tài khoản (trong bản demo).");
-    closeModal();
-    });
+    delBtn.addEventListener("click", async () => {
+        const id = appState.selectedUserId;
+        if (!id) return;
+      
+        try {
+          const token =
+            localStorage.getItem("authToken") || localStorage.getItem("token");
+      
+          const res = await fetch(`/api/admin/users/${id}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: "Bearer " + token } : {}),
+            },
+          });
+      
+          let data = {};
+          try {
+            data = await res.json();
+          } catch (e) {
+            // nếu backend không trả JSON cũng không sao
+          }
+      
+          if (!res.ok || data.error) {
+            throw new Error(data.error || "Xóa tài khoản thất bại");
+          }
+      
+          // Sau khi xóa thành công → load lại danh sách user cho chắc
+          await fetchUsersFromServer();
+          renderUserTable();
+          renderUserPagination();
+      
+          showToast("success", "Đã xóa tài khoản.");
+          closeModal();
+        } catch (err) {
+          console.error("Lỗi xóa user:", err);
+          showToast("error", "Không xóa được tài khoản. Vui lòng thử lại.");
+        }
+      });
+      
     modalFooter.appendChild(delBtn);
 }
 }
