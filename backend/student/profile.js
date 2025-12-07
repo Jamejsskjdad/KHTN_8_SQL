@@ -1,3 +1,4 @@
+// backend/student/profile.js
 const { getPool } = require('../db');
 
 /**

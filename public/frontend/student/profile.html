@@ -18,10 +18,10 @@
     <main>
       <section class="card" id="profileCard">
         <h2>Thông tin tài khoản</h2>
-        <p><strong>Username:</strong> <span id="username">...</span></p>
+        <p><strong>Họ tên:</strong> <span id="fullName">...</span></p>
         <p><strong>Email:</strong> <span id="email">...</span></p>
-        <p><strong>Role:</strong> <span id="role">...</span></p>
-        <p><strong>Class:</strong> <span id="class">...</span></p>\
+        <p><strong>Vai trò:</strong> <span id="role">...</span></p>
+        <p><strong>Lớp:</strong> <span id="class">...</span></p>
       </section>
 
       <section class="card posts">
@@ -57,20 +57,19 @@
     async function loadProfile() {
       try {
         const res = await fetch('/api/student/profile', {
-          headers: {
-            'Authorization': 'Bearer ' + token
-          }
+          headers: { 'Authorization': 'Bearer ' + token }
         });
 
         if (!res.ok) throw new Error('Response not ok');
 
         const data = await res.json();
-        document.getElementById('username').textContent = data.Username;
+        // Hiển thị fullname đúng theo HTML
+        document.getElementById('fullName').textContent = data.Fullname || '(chưa có)';
         document.getElementById('email').textContent    = data.Email || '(chưa có)';
         document.getElementById('role').textContent     = data.Role;
         document.getElementById('class').textContent    = data.Class || '(chưa có)';
-        const displayName = data.Fullname || data.Username || 'Học sinh';
-        document.getElementById('studentName').textContent = displayName;
+
+        // Không cần studentName nữa vì bạn không có phần tử này
       } catch (err) {
         console.error(err);
         alert('Lỗi tải profile student');
