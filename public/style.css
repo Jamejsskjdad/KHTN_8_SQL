@@ -740,6 +740,12 @@ footer {
         height: 400px;
     }
 }
+.user-menu-button {
+    background: transparent !important;   /* bỏ nền trắng */
+    box-shadow: none !important;          /* bỏ bóng trắng */
+    padding: 4px 8px !important;          /* gọn hơn nếu cần */
+}
+
 /* Nút user – luôn là pill, bên trong chứa avatar + tên */
 .user-menu-button {
     border: none;
@@ -747,7 +753,7 @@ footer {
     cursor: pointer;
     padding: 8px 16px;
     border-radius: 999px;
-    background: #ffffff;
+    background: transparent;
     color: #333;
     font-size: 18px;
     font-weight: 500;
@@ -755,7 +761,7 @@ footer {
     display: flex;
     align-items: center;
     gap: 12px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    box-shadow: none;  
     transition: background 0.2s, transform 0.1s, box-shadow 0.1s;
   }
   
