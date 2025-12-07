@@ -118,7 +118,7 @@ async function getPostsByStatus(req, res) {
         p.LinkOrImage,
         p.Status,
         p.CreatedAt,
-        u.Username AS CreatedBy
+        u.Fullname AS CreatedBy   -- 👈 đổi từ Username thành Fullname
       FROM Posts p
       JOIN Users u ON p.UserId = u.UserId
       ${whereClause}
@@ -196,8 +196,8 @@ async function approvePost(req, res) {
           p.LinkOrImage,
           p.Status,
           p.CreatedAt,
-          u.Username AS AuthorName,  -- dùng Username làm "họ tên"
-          u.class    AS AuthorClass  -- cột class trong bảng Users
+          u.Fullname AS AuthorName,  -- 👈 ĐỔI Ở ĐÂY
+          u.class    AS AuthorClass
         FROM Posts p
         JOIN Users u ON p.UserId = u.UserId
         WHERE p.PostId = @postId

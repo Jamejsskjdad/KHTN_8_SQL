@@ -520,25 +520,34 @@ function createFloatingIcons() {
         container.appendChild(iconDiv);
     }
 }
+// ========== USER MENU (avatar + dropdown) ==========
+
+// Dựng avatar + nội dung dropdown dựa trên role + fullname/username
 function setupUserMenu() {
-    const btn = document.getElementById('userMenuButton');
-    const label = document.getElementById('userMenuLabel');
-    const avatar = document.getElementById('userMenuAvatar');
+    const btn      = document.getElementById('userMenuButton');
+    const avatar   = document.getElementById('userMenuAvatar');
+    const label    = document.getElementById('userMenuLabel');
     const dropdown = document.getElementById('userMenuDropdown');
-    if (!btn || !label || !dropdown) return;
   
-    // Guest hoặc chưa đăng nhập
-    if (!authRole || authRole === 'guest') {
+    if (!btn || !avatar || !label || !dropdown) return;
+  
+    const role     = localStorage.getItem('authRole')     || 'guest';
+    const fullname = localStorage.getItem('authFullname') || '';
+    const username = localStorage.getItem('authUsername') || '';
+  
+    // Guest / chưa đăng nhập
+    if (!role || role === 'guest') {
       btn.classList.remove('logged-in');
   
-      if (avatar) {
-        avatar.textContent = '';         // xoá chữ trong avatar
-        avatar.style.display = 'none';   // ẩn hẳn avatar
-      }
+      avatar.style.display = 'none';
+      avatar.textContent   = '';
   
       label.textContent = 'Đăng nhập';
-      dropdown.classList.add('hidden');
   
+      dropdown.classList.add('hidden');
+      dropdown.innerHTML = '';
+  
+      // bấm là đi login
       btn.onclick = () => {
         window.location.href = '/login.html';
       };
@@ -546,93 +555,95 @@ function setupUserMenu() {
     }
   
     // Đã đăng nhập: user hoặc admin
+    const displayName = (fullname || username || 'Người dùng').trim();
+  
     btn.classList.add('logged-in');
+    avatar.style.display = 'flex';
+    avatar.textContent   = displayName.charAt(0).toUpperCase();
+    label.textContent    = displayName;
   
-    const initial = (authUsername && authUsername[0])
-      ? authUsername[0].toUpperCase()
-      : (authRole === 'admin' ? 'A' : 'U');
-  
-    if (avatar) {
-      avatar.textContent = initial;
-      avatar.style.display = 'flex';
-    }
-  
-    // Hiển thị username đầy đủ bên cạnh avatar
-    label.textContent = authUsername || (authRole === 'admin' ? 'Admin' : 'User');
-  
-  
-    // Build menu items
+    // Sinh các item trong dropdown
     const items = [];
   
-    // Profile
-    items.push({
-      id: 'profile',
-      label: 'Trang cá nhân',
-    });
+    // luôn có Trang cá nhân
+    items.push({ id: 'profile', label: 'Trang cá nhân' });
   
-    // Dashboard chỉ cho admin
-    if (authRole === 'admin') {
-      items.push({
-        id: 'dashboard',
-        label: 'Dashboard quản trị',
-      });
+    // admin thêm Dashboard
+    if (role === 'admin') {
+      items.push({ id: 'dashboard', label: 'Dashboard quản trị' });
     }
   
-    // Logout
-    items.push({
-      id: 'logout',
-      label: 'Đăng xuất',
-    });
+    // Đăng xuất
+    items.push({ id: 'logout', label: 'Đăng xuất' });
   
     dropdown.innerHTML = items
       .map(item => `<button class="user-menu-item" data-id="${item.id}">${item.label}</button>`)
       .join('');
+  }
   
-    // Toggle dropdown khi bấm avatar
-    btn.onclick = (e) => {
+  // Gắn sự kiện click cho nút avatar và dropdown
+  function initUserMenuInteractions() {
+    const btn      = document.getElementById('userMenuButton');
+    const dropdown = document.getElementById('userMenuDropdown');
+    if (!btn || !dropdown) return;
+  
+    // tránh gắn trùng nhiều lần
+    if (btn._userMenuBound) return;
+    btn._userMenuBound = true;
+  
+    // Bấm avatar
+    btn.addEventListener('click', (e) => {
+      const role = localStorage.getItem('authRole') || 'guest';
+  
+      // guest đã xử lý trong setupUserMenu (redirect login) → không toggle dropdown
+      if (!role || role === 'guest') return;
+  
       e.stopPropagation();
       dropdown.classList.toggle('hidden');
-    };
+    });
   
-    // Click item trong dropdown
+    // Bấm item trong dropdown
     dropdown.addEventListener('click', (e) => {
       const itemEl = e.target.closest('.user-menu-item');
       if (!itemEl) return;
-      const id = itemEl.dataset.id;
+  
+      const id   = itemEl.dataset.id;
+      const role = localStorage.getItem('authRole') || 'guest';
   
       if (id === 'profile') {
-        if (authRole === 'admin') {
+        if (role === 'admin') {
           window.location.href = '/frontend/admin/profile.html';
         } else {
           window.location.href = '/frontend/student/profile.html';
         }
+        return;
       }
   
-      if (id === 'dashboard' && authRole === 'admin') {
+      if (id === 'dashboard' && role === 'admin') {
         window.location.href = '/frontend/admin/dashboard.html';
+        return;
       }
   
       if (id === 'logout') {
         localStorage.removeItem('authToken');
         localStorage.removeItem('authRole');
         localStorage.removeItem('authUsername');
+        localStorage.removeItem('authFullname');
         window.location.href = '/login.html';
       }
     });
   
-    // Click ra ngoài để đóng dropdown
+    // Click ra ngoài → đóng dropdown
     document.addEventListener('click', () => {
       dropdown.classList.add('hidden');
     });
   }
   
-  // Gọi sau khi DOM sẵn sàng
   document.addEventListener('DOMContentLoaded', () => {
+    // User menu
     setupUserMenu();
-  });
-  
-// Khởi chạy mọi thứ sau khi DOM đã sẵn sàng
-document.addEventListener('DOMContentLoaded', () => {
+    initUserMenuInteractions();
+
     // Bắt sự kiện đóng chatbot khi click ra ngoài
     const modal = document.getElementById('chatbotModal');
     if (modal) {

@@ -1,4 +1,3 @@
-// backend/student/profile.js
 const { getPool } = require('../db');
 
 /**
@@ -12,7 +11,13 @@ async function getProfile(req, res) {
     const result = await pool.request()
       .input('userId', req.user.userId)
       .query(`
-        SELECT UserId, Username, Email, Role, Class
+        SELECT 
+          UserId,
+          Username,
+          Fullname,  -- 👈 thêm cột họ tên hiển thị
+          Email,
+          Role,
+          Class
         FROM Users
         WHERE UserId = @userId
       `);
@@ -21,6 +26,7 @@ async function getProfile(req, res) {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    // recordset[0] giờ sẽ có thêm field Fullname
     res.json(result.recordset[0]);
   } catch (err) {
     console.error('Lỗi lấy profile student:', err);

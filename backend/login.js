@@ -12,8 +12,8 @@ const { SECRET } = require('./auth/middleware');  // middleware nằm trong back
 // backend/login.js
 
 async function register(req, res) {
-  const { username, email, password, className } = req.body || {};
-  // className: tên lớp người dùng nhập, ví dụ "8A1"
+  const { username, email, password, className, fullname } = req.body || {};
+  // className: tên lớp, fullname: họ tên hiển thị
 
   if (!username || !email || !password || !className) {
     return res.status(400).json({ error: 'Thiếu username, email, password hoặc class' });
@@ -37,22 +37,29 @@ async function register(req, res) {
     }
 
     const hash = await bcrypt.hash(password, 10);
+    const displayName = (fullname && fullname.trim()) || username;
 
     const result = await pool.request()
       .input('username', username)
       .input('email', email)
       .input('passwordHash', hash)
-      .input('class', className) // <-- thêm dòng này
+      .input('class', className)
+      .input('fullname', displayName)
       .query(`
-        INSERT INTO Users (Username, Email, PasswordHash, Role, Class)
-        OUTPUT INSERTED.UserId, INSERTED.Role
-        VALUES (@username, @email, @passwordHash, 'user', @class)
+        INSERT INTO Users (Username, Email, PasswordHash, Role, Class, Fullname)
+        OUTPUT INSERTED.UserId, INSERTED.Role, INSERTED.Fullname
+        VALUES (@username, @email, @passwordHash, 'user', @class, @fullname)
       `);
 
     const user = result.recordset[0];
 
     const token = jwt.sign(
-      { userId: user.UserId, username, role: user.Role },
+      {
+        userId: user.UserId,
+        username,
+        fullname: user.Fullname,   // 👈 thêm fullname vào token
+        role: user.Role
+      },
       SECRET,
       { expiresIn: '7d' }
     );
@@ -61,67 +68,77 @@ async function register(req, res) {
       token,
       role: user.Role,
       username,
-      class: className, // nếu muốn trả về luôn
+      fullname: user.Fullname,
+      class: className,
     });
   } catch (err) {
     console.error('Lỗi register:', err);
     res.status(500).json({ error: 'Lỗi server' });
   }
 }
-// 👉 THÊM HÀM MỚI: registerAdmin (tạo user có role = 'admin')
+
 async function registerAdmin(req, res) {
-    const { username, email, password } = req.body || {};
-  
-    if (!username || !email || !password) {
-      return res.status(400).json({ error: 'Thiếu username, email hoặc password' });
-    }
-  
-    try {
-      const pool = await getPool();
-  
-      const check = await pool.request()
-        .input('username', username)
-        .input('email', email)
-        .query(`
-          SELECT 1
-          FROM Users
-          WHERE Username = @username OR Email = @email
-        `);
-  
-      if (check.recordset.length > 0) {
-        return res.status(400).json({ error: 'Username hoặc email đã tồn tại' });
-      }
-  
-      const hash = await bcrypt.hash(password, 10);
-  
-      const result = await pool.request()
-        .input('username', username)
-        .input('email', email)
-        .input('passwordHash', hash)
-        .query(`
-          INSERT INTO Users (Username, Email, PasswordHash, Role)
-          OUTPUT INSERTED.UserId, INSERTED.Role
-          VALUES (@username, @email, @passwordHash, 'admin')
-        `);
-  
-      const user = result.recordset[0];
-  
-      const token = jwt.sign(
-        { userId: user.UserId, username, role: user.Role },
-        SECRET,
-        { expiresIn: '7d' }
-      );
-  
-      res.json({
-        token,
-        role: user.Role,      // 'admin'
-        username,
-      });
-    } catch (err) {
-      console.error('Lỗi registerAdmin:', err);
-      res.status(500).json({ error: 'Lỗi server' });
-    }
+  const { username, email, password, fullname } = req.body || {};
+
+  if (!username || !email || !password) {
+    return res.status(400).json({ error: 'Thiếu username, email hoặc password' });
   }
+
+  try {
+    const pool = await getPool();
+
+    const check = await pool.request()
+      .input('username', username)
+      .input('email', email)
+      .query(`
+        SELECT 1
+        FROM Users
+        WHERE Username = @username OR Email = @email
+      `);
+
+    if (check.recordset.length > 0) {
+      return res.status(400).json({ error: 'Username hoặc email đã tồn tại' });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+    const displayName = (fullname && fullname.trim()) || username;
+
+    const result = await pool.request()
+      .input('username', username)
+      .input('email', email)
+      .input('passwordHash', hash)
+      .input('fullname', displayName)
+      .query(`
+        INSERT INTO Users (Username, Email, PasswordHash, Role, Fullname)
+        OUTPUT INSERTED.UserId, INSERTED.Role, INSERTED.Fullname
+        VALUES (@username, @email, @passwordHash, 'admin', @fullname)
+      `);
+
+    const user = result.recordset[0];
+
+    const token = jwt.sign(
+      {
+        userId: user.UserId,
+        username,
+        fullname: user.Fullname,   // 👈
+        role: user.Role
+      },
+      SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      token,
+      role: user.Role,
+      username,
+      fullname: user.Fullname,
+    });
+  } catch (err) {
+    console.error('Lỗi registerAdmin:', err);
+    res.status(500).json({ error: 'Lỗi server' });
+  }
+}
+
 /**
  * Đăng nhập (dùng cho cả admin & student)
  * POST /api/auth/login
@@ -139,7 +156,7 @@ async function login(req, res) {
     const result = await pool.request()
       .input('username', username)
       .query(`
-        SELECT TOP 1 UserId, Username, Email, PasswordHash, Role
+        SELECT TOP 1 UserId, Username, Fullname, Email, PasswordHash, Role
         FROM Users
         WHERE Username = @username
       `);
@@ -156,15 +173,21 @@ async function login(req, res) {
     }
 
     const token = jwt.sign(
-      { userId: user.UserId, username: user.Username, role: user.Role },
+      {
+        userId: user.UserId,
+        username: user.Username,
+        fullname: user.Fullname,   // 👈
+        role: user.Role
+      },
       SECRET,
       { expiresIn: '7d' }
     );
 
     res.json({
       token,
-      role: user.Role,       // 'admin' hoặc 'user'
+      role: user.Role,
       username: user.Username,
+      fullname: user.Fullname,    // 👈 để frontend lưu
     });
   } catch (err) {
     console.error('Lỗi login:', err);
@@ -183,7 +206,7 @@ async function me(req, res) {
     const result = await pool.request()
       .input('userId', req.user.userId)
       .query(`
-        SELECT UserId, Username, Email, Role, Class
+        SELECT UserId, Username, Fullname, Email, Role, Class
         FROM Users
         WHERE UserId = @userId
       `);

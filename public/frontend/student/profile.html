@@ -69,6 +69,8 @@
         document.getElementById('email').textContent    = data.Email || '(chưa có)';
         document.getElementById('role').textContent     = data.Role;
         document.getElementById('class').textContent    = data.Class || '(chưa có)';
+        const displayName = data.Fullname || data.Username || 'Học sinh';
+        document.getElementById('studentName').textContent = displayName;
       } catch (err) {
         console.error(err);
         alert('Lỗi tải profile student');

@@ -1,3 +1,4 @@
+//frontend/admin/profile.js
 // ========== AUTH ==========
 const token = localStorage.getItem('authToken');
 const role = localStorage.getItem('authRole');
@@ -45,7 +46,7 @@ async function loadProfile() {
 
     const data = await res.json();
 
-    const name = data.Name || data.Username || 'Admin';
+    const name = data.Fullname || data.Username || 'Admin';
     const email = data.Email || '';
     const created = data.CreatedAt
       ? new Date(data.CreatedAt).toLocaleString('vi-VN')

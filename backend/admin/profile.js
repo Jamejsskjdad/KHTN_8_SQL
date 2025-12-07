@@ -39,22 +39,20 @@ async function getProfile(req, res) {
 
     let result;
     if (userId) {
-      // Ưu tiên lấy theo UserId
       result = await pool
         .request()
         .input('UserId', userId)
         .query(`
-          SELECT UserId, Username, Email, Role, CreatedAt, class
+          SELECT UserId, Username, Fullname, Email, Role, CreatedAt, class
           FROM Users
           WHERE UserId = @UserId
         `);
     } else {
-      // fallback: lấy theo Username
       result = await pool
         .request()
         .input('Username', username)
         .query(`
-          SELECT UserId, Username, Email, Role, CreatedAt, class
+          SELECT UserId, Username, Fullname, Email, Role, CreatedAt, class
           FROM Users
           WHERE Username = @Username
         `);
@@ -69,6 +67,7 @@ async function getProfile(req, res) {
     res.json({
       UserId: user.UserId,
       Username: user.Username,
+      Fullname: user.Fullname,   // 👈
       Email: user.Email,
       Role: user.Role,
       CreatedAt: user.CreatedAt,
@@ -92,14 +91,11 @@ async function updateProfile(req, res) {
   try {
     const pool = await getPool();
 
-    // Nếu token chưa có userId, lấy ra từ Username
     if (!userId && username) {
       const r = await pool
         .request()
         .input('Username', username)
-        .query(`
-          SELECT UserId FROM Users WHERE Username = @Username
-        `);
+        .query(`SELECT UserId FROM Users WHERE Username = @Username`);
 
       if (!r.recordset || r.recordset.length === 0) {
         return res.status(404).json({ message: 'Không tìm thấy tài khoản.' });
@@ -112,16 +108,15 @@ async function updateProfile(req, res) {
       return res.status(401).json({ message: 'Không xác thực được người dùng.' });
     }
 
-    // Ở đây mình map "Họ và tên" vào cột Username (vì bảng không có cột Name riêng)
     await pool
       .request()
       .input('UserId', userId)
-      .input('FullName', fullname)
+      .input('Fullname', fullname)
       .input('Email', email)
       .query(`
         UPDATE Users
-        SET Username = @FullName,
-            Email = @Email
+        SET Fullname = @Fullname,
+            Email    = @Email
         WHERE UserId = @UserId
       `);
 
