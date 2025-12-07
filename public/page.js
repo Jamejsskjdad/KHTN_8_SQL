@@ -89,7 +89,7 @@ function buildCardHtml(item, type, canDelete) {
     const createdText = formatDateTimeShort(item.createdAt);
 
     const metaAuthor = `Người đăng: ${escapeHtml(authorName + authorClass)}`;
-    const metaTime = createdText ? `Đăng ngày: ${createdText}` : '';
+    // const metaTime = createdText ? `Đăng ngày: ${createdText}` : '';
 
     return `
         <div class="card">
@@ -103,7 +103,7 @@ function buildCardHtml(item, type, canDelete) {
 
             <div class="card-meta">
                 <span class="card-author">${metaAuthor}</span>
-                ${metaTime ? `<span class="card-time">${metaTime}</span>` : ''}
+                
             </div>
 
             <button class="card-btn" onclick="openLink(event, '${item.link}')">
