@@ -36,10 +36,10 @@ function showToast(type, title, msg) {
 
 // ========== LOAD PROFILE ==========
 async function loadProfile() {
-  try {
+try {
     const res = await fetch('/api/admin/profile', {
-      method: 'GET',
-      headers: getHeaders()
+    method: 'GET',
+    headers: getHeaders()
     });
 
     if (!res.ok) throw new Error();
@@ -49,10 +49,16 @@ async function loadProfile() {
     const name = data.Fullname || data.Username || 'Admin';
     const email = data.Email || '';
     const created = data.CreatedAt
-      ? new Date(data.CreatedAt).toLocaleString('vi-VN')
-      : '...';
+    ? new Date(data.CreatedAt).toLocaleString('vi-VN')
+    : '...';
     const roleText = data.Role || 'admin';
     const first = name.charAt(0).toUpperCase() || 'A';
+
+    // >>> THÊM 2 DÒNG NÀY <<<
+    localStorage.setItem('authFullname', name);
+    if (data.Username) {
+    localStorage.setItem('authUsername', data.Username);
+    }
 
     // Header
     document.getElementById('headerAdminName').textContent = name;
@@ -69,11 +75,12 @@ async function loadProfile() {
     // Form
     document.getElementById('inputFullname').value = name;
     document.getElementById('inputEmail').value = email;
-  } catch (err) {
+} catch (err) {
     console.error(err);
     showToast('error', 'Lỗi', 'Không tải được thông tin tài khoản.');
-  }
 }
+}
+  
 
 // ========== UPDATE PROFILE (CALL API) ==========
 document.getElementById('editProfileForm').addEventListener('submit', async e => {
@@ -112,7 +119,7 @@ document.getElementById('editProfileForm').addEventListener('submit', async e =>
     document.getElementById('profileFullname').textContent = fullname;
     document.getElementById('profileEmail').textContent = email;
     document.getElementById('profileAvatarLarge').textContent = first;
-
+    localStorage.setItem('authFullname', fullname);
     showToast('success', 'Đã lưu', 'Cập nhật thông tin thành công.');
   } catch (err) {
     console.error(err);
@@ -177,10 +184,13 @@ document.getElementById('btnBackHome').onclick = () => {
 };
 
 document.getElementById('logoutBtn').onclick = () => {
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('authRole');
-  window.location.href = '/login.html';
-};
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('authRole');
+    localStorage.removeItem('authUsername');
+    localStorage.removeItem('authFullname');
+    window.location.href = '/login.html';
+  };
+  
 
 // Init
 loadProfile();
