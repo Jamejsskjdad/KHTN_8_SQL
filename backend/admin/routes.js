@@ -21,7 +21,8 @@ router.get('/profile', requireAuth, requireAdmin, getProfile);
 // ==== QUẢN LÝ USER (API mới) ====
 // GET /api/admin/users
 router.get('/users', requireAuth, requireAdmin, userManager.getAllUsers);
-
+// POST /api/admin/users  (tạo user mới)
+router.post('/users', requireAuth, requireAdmin, userManager.createUser);
 // PUT /api/admin/users/:id
 router.put('/users/:id', requireAuth, requireAdmin, userManager.updateUser);
 

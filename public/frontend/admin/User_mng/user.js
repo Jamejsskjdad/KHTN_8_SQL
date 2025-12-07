@@ -573,36 +573,72 @@ if (appState.modal === "create") {
     createBtnModal.className =
     "focus-ring inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#4b3ccf] to-[#007bff] px-4 py-1.5 text-xs font-medium text-white shadow-md hover:opacity-95 transition-opacity";
     createBtnModal.textContent = "Tạo tài khoản";
-    createBtnModal.addEventListener("click", () => {
+    createBtnModal.addEventListener("click", async () => {
     const fullName = document.getElementById("create-fullname").value.trim();
     const username = document.getElementById("create-username").value.trim();
     const email = document.getElementById("create-email").value.trim();
     const password = document.getElementById("create-password").value.trim();
     const className = document.getElementById("create-class").value.trim();
-    const role = document.getElementById("create-role").value;
-
+    const roleLabel = document.getElementById("create-role").value; // "User" | "Admin"
+    
     if (!fullName || !username || !email || !password) {
         showToast("error", "Vui lòng điền đầy đủ các trường bắt buộc.");
         return;
     }
-
-    const newUser = {
-        id: Date.now().toString(),
-        fullName,
-        username,
-        email,
-        className: role === "Admin" ? "" : (className || ""),
-        role,
-        createdAt: new Date().toISOString(),
-        active: true
-    };
-
-    appState.users.push(newUser);
-    renderUserTable();
-    renderUserPagination();
-    showToast("success", "Đã tạo tài khoản mới thành công!");
-    closeModal();
-    });
+    
+    // Nếu DB lưu 'user' / 'admin' thì map ở đây
+    const role = roleLabel === "Admin" ? "admin" : "user";
+    
+    try {
+        const token =
+        localStorage.getItem("authToken") || localStorage.getItem("token");
+    
+        const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: "Bearer " + token } : {}),
+        },
+        body: JSON.stringify({
+            fullName,
+            username,
+            email,
+            password,
+            className,
+            role,
+        }),
+        });
+    
+        const data = await res.json();
+        if (!res.ok || data.error) {
+        throw new Error(data.error || "Tạo tài khoản thất bại");
+        }
+    
+        // Cách 1: nếu backend trả về user mới, có đủ id/createdAt...
+        //  (giống format getAllUsers)
+        const created = {
+        id: String(data.id),
+        fullName: data.fullName || fullName,
+        username: data.username || username,
+        email: data.email || email,
+        className: data.className ?? className ?? "",
+        // map ngược về label hiển thị nếu bạn muốn dùng "Admin"/"User" trong UI
+        role: data.role === "admin" ? "Admin" : "User",
+        createdAt: data.createdAt || new Date().toISOString(),
+        active: true,
+        };
+    
+        appState.users.unshift(created); // thêm lên đầu danh sách
+        renderUserTable();
+        renderUserPagination();
+    
+        showToast("success", "Đã tạo tài khoản mới thành công!");
+        closeModal();
+    } catch (err) {
+        console.error("Lỗi tạo user:", err);
+        showToast("error", "Không tạo được tài khoản. Vui lòng thử lại.");
+    }
+    });     
     modalFooter.appendChild(createBtnModal);
 } else if (appState.modal === "view") {
     modalTitle.textContent = (window.elementSdk && window.elementSdk.config.detail_modal_title) || defaultConfig.detail_modal_title;

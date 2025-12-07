@@ -99,8 +99,91 @@ async function updateUser(req, res) {
       .json({ error: 'Lỗi server khi cập nhật người dùng' });
   }
 }
-
+/**
+ * POST /api/admin/users
+ * Tạo mới một user
+ * Body: { fullName, username, email, password, className, role }
+ */
+async function createUser(req, res) {
+    const { fullName, username, email, password, className, role } = req.body || {};
+  
+    // Validate cơ bản
+    if (!fullName || !username || !email || !password || !role) {
+      return res.status(400).json({
+        error: 'fullName, username, email, password, role là bắt buộc',
+      });
+    }
+  
+    try {
+      const pool = await getPool();
+  
+      // 1. Kiểm tra trùng username / email
+      const checkReq = pool.request();
+      checkReq.input('Username', sql.NVarChar(50), username);
+      checkReq.input('Email', sql.NVarChar(255), email);
+  
+      const checkResult = await checkReq.query(`
+        SELECT TOP 1 UserId
+        FROM Users
+        WHERE Username = @Username OR Email = @Email
+      `);
+  
+      if (checkResult.recordset.length > 0) {
+        return res
+          .status(400)
+          .json({ error: 'Username hoặc email đã tồn tại' });
+      }
+  
+      // 2. Hash password
+      const passwordHash = await bcrypt.hash(password, 10);
+  
+      // Chuẩn hoá role về 'admin' | 'user'
+      const normalizedRole =
+        String(role).toLowerCase() === 'admin' ? 'admin' : 'user';
+  
+      // 3. Insert user mới
+      const insertReq = pool.request();
+      insertReq.input('Username', sql.NVarChar(50), username);
+      insertReq.input('Email', sql.NVarChar(255), email);
+      insertReq.input('PasswordHash', sql.NVarChar(255), passwordHash);
+      insertReq.input('Role', sql.NVarChar(20), normalizedRole);
+      insertReq.input('Class', sql.NVarChar(50), className || null);
+      insertReq.input('Fullname', sql.NVarChar(50), fullName);
+  
+      const insertResult = await insertReq.query(`
+        INSERT INTO Users (Username, Email, PasswordHash, Role, CreatedAt, [class], Fullname)
+        OUTPUT 
+          INSERTED.UserId    AS id,
+          INSERTED.Username  AS username,
+          INSERTED.Email     AS email,
+          INSERTED.Role      AS role,
+          INSERTED.CreatedAt AS createdAt,
+          INSERTED.[class]   AS className,
+          INSERTED.Fullname  AS fullName
+        VALUES (
+          @Username,
+          @Email,
+          @PasswordHash,
+          @Role,
+          GETUTCDATE(),
+          @Class,
+          @Fullname
+        )
+      `);
+  
+      const newUser = insertResult.recordset[0];
+  
+      return res.status(201).json(newUser);
+    } catch (err) {
+      console.error('Lỗi createUser:', err);
+      return res
+        .status(500)
+        .json({ error: 'Lỗi server khi tạo người dùng' });
+    }
+  }
+  
 module.exports = {
   getAllUsers,
   updateUser,
+  createUser,  
 };
