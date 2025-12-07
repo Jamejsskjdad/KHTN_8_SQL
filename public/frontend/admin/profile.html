@@ -1,69 +1,183 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Profile</title>
-  <link rel="stylesheet" href="profile.css">
+  <meta charset="UTF-8" />
+  <title>Admin Profile - KHTN 8</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="profile.css" />
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <h1>Trang cá nhân Admin</h1>
-      <nav class="nav">
-        <a href="/index.html">🏠 Trang chính</a>
-        <a href="/frontend/admin/dashboard.html">📊 Dashboard duyệt bài</a>
-        <button id="logoutBtn">Đăng xuất</button>
-      </nav>
-    </header>
+  <div class="page-wrapper">
+    <div class="page-inner">
+      <!-- Header -->
+      <header class="admin-header">
+        <button class="back-button" type="button" id="btnBackHome">
+          <span class="back-icon">←</span>
+          <span>Quay lại trang chủ</span>
+        </button>
 
-    <main>
-      <section class="card" id="profileCard">
-        <h2>Thông tin tài khoản</h2>
-        <p><strong>Username:</strong> <span id="username">...</span></p>
-        <p><strong>Email:</strong> <span id="email">...</span></p>
-        <p><strong>Role:</strong> <span id="role">...</span></p>
-      </section>
-    </main>
+        <div class="admin-header-right">
+          <div class="avatar-small" id="headerAvatar">A</div>
+          <div class="admin-info-header">
+            <div class="admin-name" id="headerAdminName">Admin</div>
+            <div class="admin-email" id="headerAdminEmail">admin@example.com</div>
+          </div>
+
+          <button class="back-button" type="button" id="logoutBtn">
+            <span>Đăng xuất</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main>
+        <!-- Profile Card -->
+        <section class="profile-card" aria-labelledby="profileCardTitle">
+          <div class="profile-avatar-large" aria-hidden="true" id="profileAvatarLarge">
+            A
+          </div>
+
+          <div class="profile-main-info">
+            <h1 class="profile-fullname" id="profileFullname">Nguyễn Văn Admin</h1>
+            <p class="profile-email" id="profileEmail">admin@example.com</p>
+
+            <div class="profile-meta">
+              <div class="meta-item">
+                <span class="meta-label">Quyền truy cập</span>
+                <span class="meta-value">
+                  <span class="role-badge">
+                    <span class="role-dot"></span>
+                    <span id="profileRole">Admin</span>
+                  </span>
+                </span>
+              </div>
+
+              <div class="meta-item">
+                <span class="meta-label">Ngày tạo tài khoản</span>
+                <span class="meta-value" id="profileCreatedAt">...</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Two-column area -->
+        <section class="grid-two-columns">
+          <!-- Form chỉnh sửa thông tin (hiện tại chỉ cập nhật giao diện, chưa gọi API backend) -->
+          <section class="card" aria-labelledby="editInfoTitle">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title" id="editInfoTitle">Chỉnh sửa thông tin</h2>
+                <p class="card-subtitle">Cập nhật thông tin cơ bản của tài khoản admin.</p>
+              </div>
+            </div>
+
+            <form id="editProfileForm" novalidate>
+              <div class="form-group">
+                <label class="form-label" for="inputFullname">Họ và tên</label>
+                <input
+                  type="text"
+                  id="inputFullname"
+                  class="form-input"
+                  name="fullname"
+                  placeholder="Nhập họ và tên"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="inputEmail">Email</label>
+                <input
+                  type="email"
+                  id="inputEmail"
+                  class="form-input"
+                  name="email"
+                  placeholder="admin@example.com"
+                  required
+                />
+              </div>
+
+              <div class="form-actions">
+                <button class="btn-primary" type="submit" id="btnSaveProfile">
+                  <span class="btn-icon">💾</span>
+                  <span>Lưu thay đổi</span>
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <!-- Đổi mật khẩu -->
+          <section class="card" aria-labelledby="changePasswordTitle">
+            <div class="card-header card-header-centered">
+              <div class="lock-icon-circle" aria-hidden="true">
+                🔒
+              </div>
+              <div class="password-card-header-text">
+                <h2 class="card-title" id="changePasswordTitle">Đổi mật khẩu</h2>
+                <p class="card-subtitle">Tăng cường bảo mật cho tài khoản của bạn.</p>
+              </div>
+            </div>
+
+            <p class="password-hint">
+              Gợi ý: sử dụng tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.
+            </p>
+
+            <form id="changePasswordForm" novalidate style="margin-top: 10px;">
+              <div class="form-group">
+                <label class="form-label" for="inputOldPassword">Mật khẩu cũ</label>
+                <input
+                  type="password"
+                  id="inputOldPassword"
+                  class="form-input"
+                  name="oldPassword"
+                  placeholder="Nhập mật khẩu hiện tại"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="inputNewPassword">Mật khẩu mới</label>
+                <input
+                  type="password"
+                  id="inputNewPassword"
+                  class="form-input"
+                  name="newPassword"
+                  placeholder="Nhập mật khẩu mới"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="inputConfirmPassword">Nhập lại mật khẩu mới</label>
+                <input
+                  type="password"
+                  id="inputConfirmPassword"
+                  class="form-input"
+                  name="confirmPassword"
+                  placeholder="Nhập lại mật khẩu mới"
+                  required
+                />
+              </div>
+
+              <div class="form-actions">
+                <button class="btn-primary" type="submit" id="btnChangePassword">
+                  <span class="btn-icon">🔄</span>
+                  <span>Đổi mật khẩu</span>
+                </button>
+              </div>
+            </form>
+          </section>
+        </section>
+      </main>
+    </div>
   </div>
 
-  <script>
-    const token = localStorage.getItem('authToken');
-    const role  = localStorage.getItem('authRole');
-
-    // Chỉ cho admin truy cập
-    if (!token || role !== 'admin') {
-      window.location.href = '/index.html';
-    }
-
-    async function loadProfile() {
-      try {
-        const res = await fetch('/api/admin/profile', {
-          headers: {
-            'Authorization': 'Bearer ' + token
-          }
-        });
-
-        if (!res.ok) {
-          throw new Error('Không lấy được dữ liệu');
-        }
-
-        const data = await res.json();
-        document.getElementById('username').textContent = data.Username;
-        document.getElementById('email').textContent    = data.Email || '(chưa có)';
-        document.getElementById('role').textContent     = data.Role;
-      } catch (err) {
-        console.error(err);
-        alert('Lỗi tải profile admin');
-      }
-    }
-
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('authRole');
-      window.location.href = '/index.html';
-    });
-
-    loadProfile();
-  </script>
+  <!-- Toast container -->
+  <div
+    class="toast-container"
+    id="toastContainer"
+    aria-live="polite"
+    aria-atomic="true"
+  ></div>
+<script src="profile.js"></script>
 </body>
 </html>

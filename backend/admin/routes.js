@@ -1,16 +1,21 @@
-// backend/admin/routes.js
 const express = require('express');
+const router = express.Router();
 const { requireAuth, requireAdmin } = require('../auth/middleware');
-const { getProfile } = require('./profile');
+
+// LẤY THÊM updateProfile và changePassword
+const { getProfile, updateProfile, changePassword } = require('./profile');
+
 const {
-  getPostsByStatus,
   getSummary,
+  getPostsByStatus,
   approvePost,
-  rejectPost,
+  rejectPost
 } = require('./dashboard');
 
-const router = express.Router();
 
+// PROFILE
+router.put('/profile', requireAuth, requireAdmin, updateProfile);
+router.post('/change-password', requireAuth, requireAdmin, changePassword);
 /**
  * GET /api/admin/profile
  * YÊU CẦU: admin

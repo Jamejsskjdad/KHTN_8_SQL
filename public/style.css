@@ -158,7 +158,7 @@ footer {
 
 .edu-profile-wrapper {
     position: absolute;
-    right: 24px;          /* cách mép phải 24px – muốn sát hẳn thì dùng 0 */
+    right: 75px;          /* cách mép phải 24px – muốn sát hẳn thì dùng 0 */
     top: 50%;
     transform: translateY(-50%);
     z-index: 10;          /* để nổi lên trên */
